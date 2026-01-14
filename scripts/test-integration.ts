@@ -47,11 +47,11 @@ async function runIntegrationTests() {
       console.log(`   ${index + 1}. ${employee.name}`);
     });
 
-    // ===== TEST 3: No3 스케줄 조회 =====
-    console.log("\n📋 TEST 3: No3 스케줄 조회");
+    // ===== TEST 3: No.3 스케줄 조회 =====
+    console.log("\n📋 TEST 3: No.3 스케줄 조회");
     console.log("-".repeat(60));
 
-    const no3Schedule = await getWeekSchedule("No3");
+    const no3Schedule = await getWeekSchedule("No.3");
     console.log(`✅ 조회 성공`);
     console.log(`   📅 주간: ${no3Schedule.weekStart} ~ ${no3Schedule.weekEnd}`);
     console.log(`   📊 엔트리: ${no3Schedule.entries.length}개`);

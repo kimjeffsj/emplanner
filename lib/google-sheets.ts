@@ -77,7 +77,7 @@ export async function getEmployees(): Promise<Employee[]> {
 
 /**
  * 특정 로케이션의 주간 스케줄을 가져옵니다.
- * @param {Location} location - 로케이션 (No3 또는 Westminster)
+ * @param {Location} location - 로케이션 (No.3 또는 Westminster)
  * @returns {Promise<WeekSchedule>} 주간 스케줄 객체
  * @throws {Error} 시트를 찾을 수 없거나 데이터 로드 실패 시
  */
@@ -85,7 +85,7 @@ export async function getWeekSchedule(location: Location): Promise<WeekSchedule>
   const doc = await connectToSheet();
 
   // 시트 이름 결정 (대소문자 구분 없이 찾기)
-  const sheetName = location === 'No3' ? 'no3_schedule' : 'westminster_schedule';
+  const sheetName = location === 'No.3' ? 'no3_schedule' : 'westminster_schedule';
   const sheet = doc.sheetsByIndex.find(
     (s) => s.title.toLowerCase() === sheetName
   );
@@ -151,7 +151,7 @@ export async function getWeekSchedule(location: Location): Promise<WeekSchedule>
 export async function getEmployeeSchedule(name: string): Promise<EmployeeWeekSchedule> {
   // 양쪽 로케이션 스케줄 가져오기 (병렬 처리)
   const [no3Schedule, westminsterSchedule] = await Promise.all([
-    getWeekSchedule('No3'),
+    getWeekSchedule('No.3'),
     getWeekSchedule('Westminster'),
   ]);
 
@@ -161,7 +161,7 @@ export async function getEmployeeSchedule(name: string): Promise<EmployeeWeekSch
     (entry) => entry.name === name
   );
 
-  // 주차 정보 (No3 기준, 없으면 Westminster)
+  // 주차 정보 (No.3 기준, 없으면 Westminster)
   const weekStart = no3Schedule.weekStart || westminsterSchedule.weekStart;
   const weekEnd = no3Schedule.weekEnd || westminsterSchedule.weekEnd;
 
@@ -170,7 +170,7 @@ export async function getEmployeeSchedule(name: string): Promise<EmployeeWeekSch
 
   if (no3Entries.length > 0) {
     schedules.push({
-      location: 'No3' as Location,
+      location: 'No.3' as Location,
       entries: no3Entries,
     });
   }

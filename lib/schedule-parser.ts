@@ -105,18 +105,18 @@ export function getShiftType(value: string): ShiftType | null {
 /**
  * 구글 시트 2D 배열을 ScheduleEntry 배열로 파싱
  * @param rows - Google Sheets에서 가져온 2D 배열
- * @param location - 로케이션 (No3 또는 Westminster)
+ * @param location - 로케이션 (No.3 또는 Westminster)
  * @returns ScheduleEntry 배열
  *
  * @example
  * const mockData = [
- *   ["No3", "Sunday", "Monday", ...],
+ *   ["No.3", "Sunday", "Monday", ...],
  *   ["", "2025-01-05", "2025-01-06", ...],
  *   ["*", "", "Hyeonwoo", ...],
  *   ["11:00", "Yuran", "K", ...],
  * ];
- * parseScheduleSheet(mockData, "No3")
- * // [{ name: "Hyeonwoo", date: "2025-01-06", dayOfWeek: "Monday", shift: "*", location: "No3" }, ...]
+ * parseScheduleSheet(mockData, "No.3")
+ * // [{ name: "Hyeonwoo", date: "2025-01-06", dayOfWeek: "Monday", shift: "*", location: "No.3" }, ...]
  */
 export function parseScheduleSheet(
   rows: string[][],

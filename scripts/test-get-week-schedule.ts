@@ -18,7 +18,7 @@ async function testGetWeekSchedule() {
   try {
     // No3 스케줄 조회
     console.log("📋 No3 스케줄 조회 중...");
-    const no3Schedule = await getWeekSchedule("No3");
+    const no3Schedule = await getWeekSchedule("No.3");
 
     console.log(`\n✅ No3 스케줄 조회 성공!`);
     console.log(`  📅 주간: ${no3Schedule.weekStart} ~ ${no3Schedule.weekEnd}`);

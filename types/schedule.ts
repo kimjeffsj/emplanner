@@ -8,10 +8,10 @@ export type ShiftType = "*" | "11:00" | "15:30";
 
 /**
  * 로케이션 타입
- * - 'No3': No.3 지점
+ * - 'No.3': No.3 지점
  * - 'Westminster': Westminster 지점
  */
-export type Location = "No3" | "Westminster";
+export type Location = "No.3" | "Westminster";
 
 /**
  * 근무 시간 비고 (until/from)

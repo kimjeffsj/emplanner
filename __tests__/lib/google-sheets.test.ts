@@ -69,7 +69,7 @@ describe("Google Sheets API Integration", () => {
     it("should have required sheets", async () => {
       const doc = await connectToSheet();
 
-      const sheetTitles = doc.sheetsByIndex.map((sheet: any) => sheet.title);
+      const sheetTitles = doc.sheetsByIndex.map((sheet: { title: string }) => sheet.title);
 
       // 필수 시트 존재 확인
       expect(sheetTitles).toContain("Employees");

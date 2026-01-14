@@ -172,12 +172,12 @@ describe("getShiftType", () => {
 });
 
 describe("parseScheduleSheet", () => {
-  const location: Location = "No3";
+  const location: Location = "No.3";
 
   it("should parse basic schedule with all shift types", () => {
     const mockData = [
       [
-        "No3",
+        "No.3",
         "Sunday",
         "Monday",
         "Tuesday",
@@ -213,7 +213,7 @@ describe("parseScheduleSheet", () => {
       date: "2025-01-06",
       dayOfWeek: "Monday",
       shift: "*",
-      location: "No3",
+      location: "No.3",
     });
 
     expect(result).toContainEqual({
@@ -221,7 +221,7 @@ describe("parseScheduleSheet", () => {
       date: "2025-01-07",
       dayOfWeek: "Tuesday",
       shift: "*",
-      location: "No3",
+      location: "No.3",
     });
 
     // Morning shift entries
@@ -230,7 +230,7 @@ describe("parseScheduleSheet", () => {
       date: "2025-01-05",
       dayOfWeek: "Sunday",
       shift: "11:00",
-      location: "No3",
+      location: "No.3",
     });
 
     expect(result).toContainEqual({
@@ -238,7 +238,7 @@ describe("parseScheduleSheet", () => {
       date: "2025-01-06",
       dayOfWeek: "Monday",
       shift: "11:00",
-      location: "No3",
+      location: "No.3",
     });
 
     // Afternoon shift entries
@@ -247,7 +247,7 @@ describe("parseScheduleSheet", () => {
       date: "2025-01-05",
       dayOfWeek: "Sunday",
       shift: "15:30",
-      location: "No3",
+      location: "No.3",
     });
 
     expect(result).toContainEqual({
@@ -255,14 +255,14 @@ describe("parseScheduleSheet", () => {
       date: "2025-01-06",
       dayOfWeek: "Monday",
       shift: "15:30",
-      location: "No3",
+      location: "No.3",
     });
   });
 
   it("should parse names with time notes (until/from)", () => {
     const mockData = [
       [
-        "No3",
+        "No.3",
         "Sunday",
         "Monday",
         "Tuesday",
@@ -292,7 +292,7 @@ describe("parseScheduleSheet", () => {
       date: "2025-01-07",
       dayOfWeek: "Tuesday",
       shift: "11:00",
-      location: "No3",
+      location: "No.3",
       note: {
         type: "until",
         time: "17:00",
@@ -304,7 +304,7 @@ describe("parseScheduleSheet", () => {
       date: "2025-01-06",
       dayOfWeek: "Monday",
       shift: "15:30",
-      location: "No3",
+      location: "No.3",
       note: {
         type: "from",
         time: "17:30",
@@ -315,7 +315,7 @@ describe("parseScheduleSheet", () => {
   it("should skip empty cells", () => {
     const mockData = [
       [
-        "No3",
+        "No.3",
         "Sunday",
         "Monday",
         "Tuesday",
@@ -352,7 +352,7 @@ describe("parseScheduleSheet", () => {
   it("should handle multiple rows within same shift", () => {
     const mockData = [
       [
-        "No3",
+        "No.3",
         "Sunday",
         "Monday",
         "Tuesday",
@@ -432,7 +432,7 @@ describe("parseScheduleSheet", () => {
   it("should handle empty schedule", () => {
     const mockData = [
       [
-        "No3",
+        "No.3",
         "Sunday",
         "Monday",
         "Tuesday",
@@ -464,7 +464,7 @@ describe("parseScheduleSheet", () => {
   it("should skip rows without shift type in column A", () => {
     const mockData = [
       [
-        "No3",
+        "No.3",
         "Sunday",
         "Monday",
         "Tuesday",
