@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+/* Today Highlight Styles */
+.today {
+  @apply bg-blue-50 border-2 border-blue-500 rounded-lg;
+}
+
+.schedule-card.today {
+  @apply bg-blue-50 border-l-4 border-l-blue-500;
+}
+
+.day-column.today {
+  @apply bg-blue-50;
+}
+
+.grid-cell.today {
+  @apply bg-blue-50;
+}
