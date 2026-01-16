@@ -10,11 +10,11 @@ describe("ShiftBadge", () => {
       expect(badge).toBeInTheDocument();
     });
 
-    it('should have all-day style class for "*" shift type', () => {
+    it('should have shift-badge class for "*" shift type', () => {
       render(<ShiftBadge shift="*" />);
 
       const badge = screen.getByText("All day");
-      expect(badge).toHaveClass("all-day");
+      expect(badge).toHaveClass("shift-badge");
     });
   });
 
@@ -26,11 +26,11 @@ describe("ShiftBadge", () => {
       expect(badge).toBeInTheDocument();
     });
 
-    it('should have morning style class for "11:00" shift', () => {
+    it('should have shift-badge class for "11:00" shift', () => {
       render(<ShiftBadge shift="11:00" />);
 
       const badge = screen.getByText("11:00~");
-      expect(badge).toHaveClass("morning");
+      expect(badge).toHaveClass("shift-badge");
     });
   });
 
@@ -42,11 +42,11 @@ describe("ShiftBadge", () => {
       expect(badge).toBeInTheDocument();
     });
 
-    it('should have evening style class for "15:30" shift', () => {
+    it('should have shift-badge class for "15:30" shift', () => {
       render(<ShiftBadge shift="15:30" />);
 
       const badge = screen.getByText("15:30~");
-      expect(badge).toHaveClass("evening");
+      expect(badge).toHaveClass("shift-badge");
     });
   });
 

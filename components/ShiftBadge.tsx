@@ -1,5 +1,5 @@
-
 import { ShiftType } from '@/types/schedule';
+import { Badge } from '@/components/ui/badge';
 
 interface ShiftBadgeProps {
   shift: ShiftType;
@@ -9,22 +9,20 @@ export default function ShiftBadge({ shift }: ShiftBadgeProps) {
   // Determine display text
   const displayText = shift === '*' ? 'All day' : `${shift}~`;
 
-  // Determine CSS class based on shift type
-  const getShiftClass = (): string => {
+  // Determine variant based on shift type
+  const getVariant = (): 'default' | 'secondary' | 'outline' => {
     if (shift === '*') {
-      return 'all-day';
+      return 'default';
     } else if (shift === '11:00') {
-      return 'morning';
+      return 'secondary';
     } else {
-      return 'evening';
+      return 'outline';
     }
   };
 
-  const shiftClass = getShiftClass();
-
   return (
-    <span className={`shift-badge ${shiftClass}`}>
+    <Badge variant={getVariant()} className="shift-badge">
       {displayText}
-    </span>
+    </Badge>
   );
 }

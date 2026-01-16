@@ -41,8 +41,9 @@ describe('PersonalSchedule', () => {
 
   describe('직원 이름 표시', () => {
     it('직원 이름을 헤더에 표시한다', () => {
-      render(<PersonalSchedule schedule={mockSchedule} />);
-      const header = screen.getByRole('heading', { level: 2 });
+      const { container } = render(<PersonalSchedule schedule={mockSchedule} />);
+      // CardTitle은 div로 렌더링되므로 data-slot으로 찾기
+      const header = container.querySelector('[data-slot="card-title"]');
       expect(header).toHaveTextContent('Jenny');
     });
   });

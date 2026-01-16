@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import EmployeeSelector from "@/components/EmployeeSelector";
 
 describe("EmployeeSelector", () => {
@@ -19,14 +20,14 @@ describe("EmployeeSelector", () => {
         />
       );
 
-      const select = screen.getByRole("combobox");
-      expect(select).toHaveValue("all");
+      expect(screen.getByRole("combobox")).toBeInTheDocument();
       expect(screen.getByText("전체 보기")).toBeInTheDocument();
     });
   });
 
   describe("Employee list rendering", () => {
-    it("should render all employee names in the dropdown", () => {
+    it("should render all employee names when dropdown is opened", async () => {
+      const user = userEvent.setup();
       render(
         <EmployeeSelector
           employees={mockEmployees}
@@ -35,33 +36,20 @@ describe("EmployeeSelector", () => {
         />
       );
 
-      const select = screen.getByRole("combobox");
-      const options = Array.from(select.querySelectorAll("option"));
-      const optionTexts = options.map((opt) => opt.textContent);
+      const trigger = screen.getByRole("combobox");
+      await user.click(trigger);
 
-      expect(optionTexts).toContain("전체 보기");
-      expect(optionTexts).toContain("Ryan");
-      expect(optionTexts).toContain("Jenny");
-      expect(optionTexts).toContain("Minji");
-      expect(optionTexts).toContain("Hyeonwoo");
-    });
-
-    it('should render "전체 보기" option with value "all"', () => {
-      render(
-        <EmployeeSelector
-          employees={mockEmployees}
-          selectedEmployee={null}
-          onChange={mockOnChange}
-        />
-      );
-
-      const allOption = screen.getByText("전체 보기");
-      expect(allOption).toHaveAttribute("value", "all");
+      expect(screen.getByRole("option", { name: "전체 보기" })).toBeInTheDocument();
+      expect(screen.getByRole("option", { name: "Ryan" })).toBeInTheDocument();
+      expect(screen.getByRole("option", { name: "Jenny" })).toBeInTheDocument();
+      expect(screen.getByRole("option", { name: "Minji" })).toBeInTheDocument();
+      expect(screen.getByRole("option", { name: "Hyeonwoo" })).toBeInTheDocument();
     });
   });
 
   describe("Selection behavior", () => {
-    it("should call onChange with employee name when selecting an employee", () => {
+    it("should call onChange with employee name when selecting an employee", async () => {
+      const user = userEvent.setup();
       render(
         <EmployeeSelector
           employees={mockEmployees}
@@ -70,14 +58,18 @@ describe("EmployeeSelector", () => {
         />
       );
 
-      const select = screen.getByRole("combobox");
-      fireEvent.change(select, { target: { value: "Ryan" } });
+      const trigger = screen.getByRole("combobox");
+      await user.click(trigger);
+
+      const ryanOption = screen.getByRole("option", { name: "Ryan" });
+      await user.click(ryanOption);
 
       expect(mockOnChange).toHaveBeenCalledWith("Ryan");
       expect(mockOnChange).toHaveBeenCalledTimes(1);
     });
 
-    it('should call onChange with null when selecting "전체 보기"', () => {
+    it('should call onChange with null when selecting "전체 보기"', async () => {
+      const user = userEvent.setup();
       render(
         <EmployeeSelector
           employees={mockEmployees}
@@ -86,8 +78,11 @@ describe("EmployeeSelector", () => {
         />
       );
 
-      const select = screen.getByRole("combobox");
-      fireEvent.change(select, { target: { value: "all" } });
+      const trigger = screen.getByRole("combobox");
+      await user.click(trigger);
+
+      const allOption = screen.getByRole("option", { name: "전체 보기" });
+      await user.click(allOption);
 
       expect(mockOnChange).toHaveBeenCalledWith(null);
       expect(mockOnChange).toHaveBeenCalledTimes(1);
@@ -102,13 +97,13 @@ describe("EmployeeSelector", () => {
         />
       );
 
-      const select = screen.getByRole("combobox");
-      expect(select).toHaveValue("Jenny");
+      expect(screen.getByText("Jenny")).toBeInTheDocument();
     });
   });
 
   describe("Edge cases", () => {
-    it("should handle empty employee list", () => {
+    it("should handle empty employee list", async () => {
+      const user = userEvent.setup();
       render(
         <EmployeeSelector
           employees={[]}
@@ -117,11 +112,12 @@ describe("EmployeeSelector", () => {
         />
       );
 
-      const select = screen.getByRole("combobox");
-      const options = Array.from(select.querySelectorAll("option"));
+      const trigger = screen.getByRole("combobox");
+      await user.click(trigger);
 
+      const options = screen.getAllByRole("option");
       expect(options).toHaveLength(1);
-      expect(options[0].textContent).toBe("전체 보기");
+      expect(screen.getByRole("option", { name: "전체 보기" })).toBeInTheDocument();
     });
   });
 });

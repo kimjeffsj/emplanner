@@ -1,5 +1,7 @@
 import { ScheduleEntry } from '@/types/schedule';
 import ShiftBadge from './ShiftBadge';
+import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 interface ScheduleCardProps {
   entry: ScheduleEntry;
@@ -22,16 +24,21 @@ export default function ScheduleCard({ entry, isToday = false }: ScheduleCardPro
   const noteText = formatNote();
 
   return (
-    <div className={`schedule-card ${isToday ? 'today' : ''}`}>
-      <div className="schedule-card-date">
-        <span className="date">{formatDate(entry.date)}</span>
-        <span className="day-of-week">{entry.dayOfWeek}</span>
-      </div>
-      <div className="schedule-card-content">
-        <span className="employee-name">{entry.name}</span>
-        <ShiftBadge shift={entry.shift} />
-        {noteText && <span className="schedule-note">{noteText}</span>}
-      </div>
-    </div>
+    <Card className={cn(
+      'schedule-card py-3',
+      isToday && 'today bg-blue-50 border-l-4 border-l-blue-500'
+    )}>
+      <CardContent className="flex items-center justify-between gap-3 p-3">
+        <div className="schedule-card-date flex flex-col">
+          <span className="date font-semibold">{formatDate(entry.date)}</span>
+          <span className="day-of-week text-sm text-muted-foreground">{entry.dayOfWeek}</span>
+        </div>
+        <div className="schedule-card-content flex items-center gap-2">
+          <span className="employee-name font-medium">{entry.name}</span>
+          <ShiftBadge shift={entry.shift} />
+          {noteText && <span className="schedule-note text-sm text-muted-foreground">({noteText})</span>}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

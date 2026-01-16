@@ -1,5 +1,13 @@
 "use client";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 interface EmployeeSelectorProps {
   employees: string[];
   selectedEmployee: string | null;
@@ -11,8 +19,7 @@ export default function EmployeeSelector({
   selectedEmployee,
   onChange,
 }: EmployeeSelectorProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
+  const handleChange = (value: string) => {
     if (value === "all") {
       onChange(null);
     } else {
@@ -21,17 +28,18 @@ export default function EmployeeSelector({
   };
 
   return (
-    <select
-      value={selectedEmployee || "all"}
-      onChange={handleChange}
-      className="employee-selector"
-    >
-      <option value="all">전체 보기</option>
-      {employees.map((employee) => (
-        <option key={employee} value={employee}>
-          {employee}
-        </option>
-      ))}
-    </select>
+    <Select value={selectedEmployee || "all"} onValueChange={handleChange}>
+      <SelectTrigger className="w-[180px]">
+        <SelectValue placeholder="직원 선택" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="all">전체 보기</SelectItem>
+        {employees.map((employee) => (
+          <SelectItem key={employee} value={employee}>
+            {employee}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

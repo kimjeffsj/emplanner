@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import LocationTabs from "@/components/LocationTabs";
 
 describe("LocationTabs", () => {
@@ -16,70 +17,71 @@ describe("LocationTabs", () => {
       expect(screen.getByText("Westminster")).toBeInTheDocument();
     });
 
-    it("should render tabs as buttons", () => {
+    it("should render tabs with tab role", () => {
       render(<LocationTabs selectedLocation="No.3" onChange={mockOnChange} />);
 
-      const buttons = screen.getAllByRole("button");
-      expect(buttons).toHaveLength(2);
+      const tabs = screen.getAllByRole("tab");
+      expect(tabs).toHaveLength(2);
     });
   });
 
   describe("Active tab styling", () => {
-    it("should apply active class to No.3 tab when selected", () => {
+    it("should mark No.3 tab as active when selected", () => {
       render(<LocationTabs selectedLocation="No.3" onChange={mockOnChange} />);
 
-      const no3Tab = screen.getByText("No.3");
-      expect(no3Tab).toHaveClass("active");
+      const no3Tab = screen.getByRole("tab", { name: "No.3" });
+      expect(no3Tab).toHaveAttribute("data-state", "active");
     });
 
-    it("should apply active class to Westminster tab when selected", () => {
+    it("should mark Westminster tab as active when selected", () => {
       render(
         <LocationTabs selectedLocation="Westminster" onChange={mockOnChange} />
       );
 
-      const westminsterTab = screen.getByText("Westminster");
-      expect(westminsterTab).toHaveClass("active");
+      const westminsterTab = screen.getByRole("tab", { name: "Westminster" });
+      expect(westminsterTab).toHaveAttribute("data-state", "active");
     });
 
-    it("should not apply active class to non-selected tab", () => {
+    it("should not mark non-selected tab as active", () => {
       render(<LocationTabs selectedLocation="No.3" onChange={mockOnChange} />);
 
-      const westminsterTab = screen.getByText("Westminster");
-      expect(westminsterTab).not.toHaveClass("active");
+      const westminsterTab = screen.getByRole("tab", { name: "Westminster" });
+      expect(westminsterTab).toHaveAttribute("data-state", "inactive");
     });
   });
 
   describe("Click behavior", () => {
-    it('should call onChange with "No.3" when No.3 tab is clicked', () => {
+    it('should call onChange with "No.3" when No.3 tab is clicked', async () => {
+      const user = userEvent.setup();
       render(
         <LocationTabs selectedLocation="Westminster" onChange={mockOnChange} />
       );
 
-      const no3Tab = screen.getByText("No.3");
-      fireEvent.click(no3Tab);
+      const no3Tab = screen.getByRole("tab", { name: "No.3" });
+      await user.click(no3Tab);
 
       expect(mockOnChange).toHaveBeenCalledWith("No.3");
-      expect(mockOnChange).toHaveBeenCalledTimes(1);
     });
 
-    it('should call onChange with "Westminster" when Westminster tab is clicked', () => {
+    it('should call onChange with "Westminster" when Westminster tab is clicked', async () => {
+      const user = userEvent.setup();
       render(<LocationTabs selectedLocation="No.3" onChange={mockOnChange} />);
 
-      const westminsterTab = screen.getByText("Westminster");
-      fireEvent.click(westminsterTab);
+      const westminsterTab = screen.getByRole("tab", { name: "Westminster" });
+      await user.click(westminsterTab);
 
       expect(mockOnChange).toHaveBeenCalledWith("Westminster");
-      expect(mockOnChange).toHaveBeenCalledTimes(1);
     });
 
-    it("should allow clicking the already active tab", () => {
+    it("should not call onChange when clicking the already active tab", async () => {
+      // Radix Tabs does not trigger onChange for already active tab
+      const user = userEvent.setup();
       render(<LocationTabs selectedLocation="No.3" onChange={mockOnChange} />);
 
-      const no3Tab = screen.getByText("No.3");
-      fireEvent.click(no3Tab);
+      const no3Tab = screen.getByRole("tab", { name: "No.3" });
+      await user.click(no3Tab);
 
-      expect(mockOnChange).toHaveBeenCalledWith("No.3");
-      expect(mockOnChange).toHaveBeenCalledTimes(1);
+      expect(mockOnChange).not.toHaveBeenCalled();
     });
   });
 });

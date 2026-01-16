@@ -1,5 +1,6 @@
 import { EmployeeWeekSchedule } from '@/types/schedule';
 import ScheduleCard from './ScheduleCard';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 interface PersonalScheduleProps {
   schedule: EmployeeWeekSchedule;
@@ -31,35 +32,41 @@ export default function PersonalSchedule({
   const hasNoSchedules = activeSchedules.length === 0;
 
   return (
-    <div className="personal-schedule">
+    <div className="personal-schedule space-y-4">
       {/* Header with employee name */}
-      <div className="personal-header">
-        <h2 className="employee-name">{schedule.employeeName}</h2>
-        <div className="week-range">
-          {formatDate(schedule.weekStart)} ~ {formatDate(schedule.weekEnd)}
-        </div>
+      <Card className="personal-header">
+        <CardHeader className="pb-2">
+          <CardTitle className="employee-name text-xl">{schedule.employeeName}</CardTitle>
+          <CardDescription className="week-range">
+            {formatDate(schedule.weekStart)} ~ {formatDate(schedule.weekEnd)}
+          </CardDescription>
+        </CardHeader>
         {!hasNoSchedules && (
-          <div className="total-days">
-            총 <span className="day-count">{totalWorkDays}</span>일
-          </div>
+          <CardContent className="total-days pt-0">
+            총 <span className="day-count font-bold text-primary">{totalWorkDays}</span>일
+          </CardContent>
         )}
-      </div>
+      </Card>
 
       {/* Empty state */}
       {hasNoSchedules && (
-        <div className="empty-state">이번 주 스케줄이 없습니다</div>
+        <Card className="empty-state">
+          <CardContent className="text-center py-8 text-muted-foreground">
+            이번 주 스케줄이 없습니다
+          </CardContent>
+        </Card>
       )}
 
       {/* Location sections */}
       {activeSchedules.map((locationSchedule) => (
-        <div key={locationSchedule.location} className="location-section">
-          <div className="location-header">
-            <h3 className="location-name">{locationSchedule.location}</h3>
-            <span className="location-days">
+        <div key={locationSchedule.location} className="location-section space-y-2">
+          <div className="location-header flex items-center justify-between px-2">
+            <h3 className="location-name font-semibold text-lg">{locationSchedule.location}</h3>
+            <span className="location-days text-sm text-muted-foreground">
               {locationSchedule.entries.length}일
             </span>
           </div>
-          <div className="entries-list">
+          <div className="entries-list space-y-2">
             {locationSchedule.entries.map((entry, idx) => (
               <ScheduleCard
                 key={`${entry.date}-${entry.shift}-${idx}`}

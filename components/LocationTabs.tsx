@@ -2,6 +2,7 @@
 'use client';
 
 import { Location } from '@/types/schedule';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface LocationTabsProps {
   selectedLocation: Location;
@@ -15,16 +16,18 @@ export default function LocationTabs({
   const locations: Location[] = ['No.3', 'Westminster'];
 
   return (
-    <div className="location-tabs">
-      {locations.map((location) => (
-        <button
-          key={location}
-          className={selectedLocation === location ? 'active' : ''}
-          onClick={() => onChange(location)}
-        >
-          {location}
-        </button>
-      ))}
-    </div>
+    <Tabs
+      value={selectedLocation}
+      onValueChange={(value) => onChange(value as Location)}
+      className="w-full"
+    >
+      <TabsList>
+        {locations.map((location) => (
+          <TabsTrigger key={location} value={location}>
+            {location}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
   );
 }
