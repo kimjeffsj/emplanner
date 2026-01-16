@@ -29,7 +29,7 @@ export default function EmployeeSelector({
 
   return (
     <Select value={selectedEmployee || "all"} onValueChange={handleChange}>
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger className="w-[180px]" aria-label="직원 선택">
         <SelectValue placeholder="직원 선택" />
       </SelectTrigger>
       <SelectContent>

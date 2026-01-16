@@ -21,7 +21,7 @@ export default function LocationTabs({
       onValueChange={(value) => onChange(value as Location)}
       className="w-full"
     >
-      <TabsList>
+      <TabsList aria-label="매장 선택">
         {locations.map((location) => (
           <TabsTrigger key={location} value={location}>
             {location}

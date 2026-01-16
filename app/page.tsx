@@ -1,21 +1,24 @@
-// app/page.tsx
-import { Suspense } from 'react';
-import { getEmployees, getWeekSchedule, getEmployeeSchedule } from '@/lib/google-sheets';
-import ScheduleViewer from '@/components/ScheduleViewer';
-import { EmployeeWeekSchedule } from '@/types/schedule';
+import { Suspense } from "react";
+import {
+  getEmployees,
+  getWeekSchedule,
+  getEmployeeSchedule,
+} from "@/lib/google-sheets";
+import ScheduleViewer from "@/components/ScheduleViewer";
+import { EmployeeWeekSchedule } from "@/types/schedule";
 
 // ISR: 60초마다 revalidate
-export const revalidate = 60;
+export const revalidate = 3600;
 
 export default async function Home() {
   // 오늘 날짜 (YYYY-MM-DD)
-  const todayDate = new Date().toISOString().split('T')[0];
+  const todayDate = new Date().toISOString().split("T")[0];
 
   // 데이터 fetching (Server Component에서 실행)
   const [employees, no3Schedule, westminsterSchedule] = await Promise.all([
     getEmployees(),
-    getWeekSchedule('No.3'),
-    getWeekSchedule('Westminster'),
+    getWeekSchedule("No.3"),
+    getWeekSchedule("Westminster"),
   ]);
 
   // 각 직원의 개인 스케줄 미리 fetch (클라이언트에서 추가 요청 없이 즉시 표시)

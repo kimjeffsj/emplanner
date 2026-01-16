@@ -32,11 +32,16 @@ export default function PersonalSchedule({
   const hasNoSchedules = activeSchedules.length === 0;
 
   return (
-    <div className="personal-schedule space-y-4">
+    <section
+      className="personal-schedule space-y-4"
+      aria-label={`${schedule.employeeName}의 주간 스케줄`}
+    >
       {/* Header with employee name */}
       <Card className="personal-header">
         <CardHeader className="pb-2">
-          <CardTitle className="employee-name text-xl">{schedule.employeeName}</CardTitle>
+          <CardTitle className="employee-name text-xl" id="schedule-title">
+            {schedule.employeeName}
+          </CardTitle>
           <CardDescription className="week-range">
             {formatDate(schedule.weekStart)} ~ {formatDate(schedule.weekEnd)}
           </CardDescription>
@@ -50,7 +55,7 @@ export default function PersonalSchedule({
 
       {/* Empty state */}
       {hasNoSchedules && (
-        <Card className="empty-state">
+        <Card className="empty-state" role="status" aria-live="polite">
           <CardContent className="text-center py-8 text-muted-foreground">
             이번 주 스케줄이 없습니다
           </CardContent>
@@ -59,24 +64,29 @@ export default function PersonalSchedule({
 
       {/* Location sections */}
       {activeSchedules.map((locationSchedule) => (
-        <div key={locationSchedule.location} className="location-section space-y-2">
+        <section
+          key={locationSchedule.location}
+          className="location-section space-y-2"
+          aria-label={`${locationSchedule.location} 매장 스케줄`}
+        >
           <div className="location-header flex items-center justify-between px-2">
             <h3 className="location-name font-semibold text-lg">{locationSchedule.location}</h3>
-            <span className="location-days text-sm text-muted-foreground">
+            <span className="location-days text-sm text-muted-foreground" aria-label={`${locationSchedule.entries.length}일 근무`}>
               {locationSchedule.entries.length}일
             </span>
           </div>
-          <div className="entries-list space-y-2">
+          <div className="entries-list space-y-2" role="list" aria-label="근무 일정 목록">
             {locationSchedule.entries.map((entry, idx) => (
-              <ScheduleCard
-                key={`${entry.date}-${entry.shift}-${idx}`}
-                entry={entry}
-                isToday={todayDate === entry.date}
-              />
+              <div key={`${entry.date}-${entry.shift}-${idx}`} role="listitem">
+                <ScheduleCard
+                  entry={entry}
+                  isToday={todayDate === entry.date}
+                />
+              </div>
             ))}
           </div>
-        </div>
+        </section>
       ))}
-    </div>
+    </section>
   );
 }

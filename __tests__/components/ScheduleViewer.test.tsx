@@ -122,11 +122,20 @@ describe("ScheduleViewer", () => {
   });
 
   describe("초기 로드", () => {
-    it("전체 보기가 기본 선택되어 있다", () => {
+    it("전체 보기가 기본 선택되어 있다", async () => {
+      const user = userEvent.setup();
       render(<ScheduleViewer {...defaultProps} />);
 
-      // 드롭다운에서 '전체 보기'가 표시되어 있어야 함
-      expect(screen.getByText("전체 보기")).toBeInTheDocument();
+      // dynamic import 로딩 대기 - combobox가 나타날 때까지 기다림
+      const combobox = await screen.findByRole("combobox", {}, { timeout: 3000 });
+      expect(combobox).toBeInTheDocument();
+
+      // 드롭다운 열어서 '전체 보기'가 선택되어 있는지 확인
+      await user.click(combobox);
+
+      // 옵션에서 '전체 보기'가 존재해야 함
+      const allViewOption = await screen.findByRole("option", { name: "전체 보기" });
+      expect(allViewOption).toBeInTheDocument();
     });
 
     it("No.3 탭이 기본 선택되어 있다", () => {

@@ -38,52 +38,77 @@ export default function WeeklyGrid({ schedule, todayDate }: WeeklyGridProps) {
   };
 
   return (
-    <div className="weekly-grid w-full overflow-x-auto">
-      {/* Header row with days and dates */}
-      <div className="grid-header grid grid-cols-8 gap-1 mb-2">
-        <div className="shift-label-cell" />
-        {weekDates.map((date, index) => (
-          <div
-            key={date}
-            className={cn(
-              'day-column flex flex-col items-center p-2 rounded-lg text-center',
-              isToday(date) && 'today bg-blue-50 border-2 border-blue-500'
-            )}
-          >
-            <span className="day-name font-semibold text-sm">{DAYS[index]}</span>
-            <span className="day-date text-xs text-muted-foreground">{formatDate(date)}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Rows for each shift type */}
-      {SHIFTS.map((shift) => (
-        <div key={shift.type} className="shift-row grid grid-cols-8 gap-1 mb-1">
-          <div className="shift-label flex items-center justify-center font-medium text-sm bg-muted rounded-lg p-2">
-            {shift.label}
-          </div>
-          {weekDates.map((date) => (
+    <div
+      className="weekly-grid w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0"
+      role="region"
+      aria-label="주간 스케줄 표"
+    >
+      {/* Scrollable inner container with minimum width for mobile */}
+      <div
+        className="min-w-[700px] sm:min-w-0"
+        role="table"
+        aria-label="주간 근무 스케줄"
+      >
+        {/* Header row with days and dates */}
+        <div className="grid-header grid grid-cols-8 gap-1 sm:gap-2 mb-2" role="row">
+          <div className="shift-label-cell" role="columnheader" aria-label="시프트 유형" />
+          {weekDates.map((date, index) => (
             <div
-              key={`${date}-${shift.type}`}
+              key={date}
+              role="columnheader"
+              aria-label={`${DAYS[index]} ${formatDate(date)}${isToday(date) ? ' (오늘)' : ''}`}
               className={cn(
-                'grid-cell min-h-[60px] p-2 border rounded-lg',
-                isToday(date) && 'today bg-blue-50'
+                'day-column flex flex-col items-center p-2 rounded-lg text-center',
+                isToday(date) && 'today'
               )}
             >
-              {getEntries(date, shift.type).map((entry, idx) => (
-                <div key={`${entry.name}-${idx}`} className="entry-item mb-1">
-                  <span className="employee-name text-sm font-medium">{entry.name}</span>
-                  {entry.note && (
-                    <span className="entry-note text-xs text-muted-foreground ml-1">
-                      ({entry.note.type} {entry.note.time})
-                    </span>
-                  )}
-                </div>
-              ))}
+              <span className="day-name font-semibold text-sm">{DAYS[index]}</span>
+              <span className="day-date text-xs text-muted-foreground">{formatDate(date)}</span>
             </div>
           ))}
         </div>
-      ))}
+
+        {/* Rows for each shift type */}
+        {SHIFTS.map((shift) => (
+          <div key={shift.type} className="shift-row grid grid-cols-8 gap-1 sm:gap-2 mb-1" role="row">
+            <div
+              className="shift-label flex items-center justify-center font-medium text-sm bg-muted rounded-lg p-2"
+              role="rowheader"
+            >
+              {shift.label}
+            </div>
+            {weekDates.map((date, index) => {
+              const entries = getEntries(date, shift.type);
+              const cellLabel = entries.length > 0
+                ? `${DAYS[index]} ${shift.label}: ${entries.map(e => e.name).join(', ')}`
+                : `${DAYS[index]} ${shift.label}: 근무자 없음`;
+
+              return (
+                <div
+                  key={`${date}-${shift.type}`}
+                  role="cell"
+                  aria-label={cellLabel}
+                  className={cn(
+                    'grid-cell min-h-[60px] p-2 border rounded-lg',
+                    isToday(date) && 'today'
+                  )}
+                >
+                  {entries.map((entry, idx) => (
+                    <div key={`${entry.name}-${idx}`} className="entry-item mb-1">
+                      <span className="employee-name text-sm font-medium">{entry.name}</span>
+                      {entry.note && (
+                        <span className="entry-note text-xs text-muted-foreground ml-1">
+                          ({entry.note.type} {entry.note.time})
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

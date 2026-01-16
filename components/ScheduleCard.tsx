@@ -21,13 +21,25 @@ export default function ScheduleCard({ entry, isToday = false }: ScheduleCardPro
     return `${entry.note.type} ${entry.note.time}`;
   };
 
+  // Generate accessible label for the card
+  const getAriaLabel = (): string => {
+    const shiftText = entry.shift === '*' ? '종일' : `${entry.shift}부터`;
+    const noteText = entry.note ? `, ${entry.note.type} ${entry.note.time}` : '';
+    const todayText = isToday ? ' (오늘)' : '';
+    return `${formatDate(entry.date)} ${entry.dayOfWeek}${todayText}, ${entry.name}, ${shiftText} 근무${noteText}`;
+  };
+
   const noteText = formatNote();
 
   return (
-    <Card className={cn(
-      'schedule-card py-3',
-      isToday && 'today bg-blue-50 border-l-4 border-l-blue-500'
-    )}>
+    <Card
+      className={cn(
+        'schedule-card py-3',
+        isToday && 'today'
+      )}
+      role="article"
+      aria-label={getAriaLabel()}
+    >
       <CardContent className="flex items-center justify-between gap-3 p-3">
         <div className="schedule-card-date flex flex-col">
           <span className="date font-semibold">{formatDate(entry.date)}</span>
