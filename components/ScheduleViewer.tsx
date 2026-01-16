@@ -1,13 +1,24 @@
-// components/ScheduleViewer.tsx
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { Location, WeekSchedule, EmployeeWeekSchedule, Employee } from '@/types/schedule';
-import EmployeeSelector from './EmployeeSelector';
-import LocationTabs from './LocationTabs';
-import WeeklyGrid from './WeeklyGrid';
-import PersonalSchedule from './PersonalSchedule';
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+import {
+  Location,
+  WeekSchedule,
+  EmployeeWeekSchedule,
+  Employee,
+} from "@/types/schedule";
+
+const EmployeeSelector = dynamic(() => import("./EmployeeSelector"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-9 w-[180px] rounded-md border bg-transparent animate-pulse" />
+  ),
+});
+import LocationTabs from "./LocationTabs";
+import WeeklyGrid from "./WeeklyGrid";
+import PersonalSchedule from "./PersonalSchedule";
 
 interface ScheduleViewerProps {
   employees: Employee[];
@@ -28,7 +39,7 @@ export default function ScheduleViewer({
   const router = useRouter();
 
   // URL에서 초기값 읽기
-  const initialEmployee = searchParams.get('employee');
+  const initialEmployee = searchParams.get("employee");
 
   // 상태 관리: 선택된 직원 (null = 전체 보기)
   const [selectedEmployee, setSelectedEmployee] = useState<string | null>(
@@ -38,16 +49,19 @@ export default function ScheduleViewer({
   );
 
   // 상태 관리: 선택된 탭 (기본: No.3)
-  const [selectedLocation, setSelectedLocation] = useState<Location>('No.3');
+  const [selectedLocation, setSelectedLocation] = useState<Location>("No.3");
 
   // 직원 이름 목록 추출
   const employeeNames = employees.map((e) => e.name);
 
   // 현재 선택된 로케이션의 스케줄
-  const currentSchedule = selectedLocation === 'No.3' ? no3Schedule : westminsterSchedule;
+  const currentSchedule =
+    selectedLocation === "No.3" ? no3Schedule : westminsterSchedule;
 
   // 선택된 직원의 개인 스케줄
-  const personalSchedule = selectedEmployee ? employeeSchedules[selectedEmployee] : null;
+  const personalSchedule = selectedEmployee
+    ? employeeSchedules[selectedEmployee]
+    : null;
 
   // 직원 선택 변경 시 URL 업데이트
   const handleEmployeeChange = (employee: string | null) => {
@@ -55,15 +69,17 @@ export default function ScheduleViewer({
 
     // URL 쿼리 파라미터 업데이트
     if (employee) {
-      router.replace(`?employee=${encodeURIComponent(employee)}`, { scroll: false });
+      router.replace(`?employee=${encodeURIComponent(employee)}`, {
+        scroll: false,
+      });
     } else {
-      router.replace('/', { scroll: false });
+      router.replace("/", { scroll: false });
     }
   };
 
   // URL 파라미터 변경 감지 (브라우저 뒤로/앞으로 버튼)
   useEffect(() => {
-    const employeeFromUrl = searchParams.get('employee');
+    const employeeFromUrl = searchParams.get("employee");
     if (employeeFromUrl && employees.some((e) => e.name === employeeFromUrl)) {
       setSelectedEmployee(employeeFromUrl);
     } else if (!employeeFromUrl) {

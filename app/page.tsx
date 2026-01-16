@@ -1,4 +1,5 @@
 // app/page.tsx
+import { Suspense } from 'react';
 import { getEmployees, getWeekSchedule, getEmployeeSchedule } from '@/lib/google-sheets';
 import ScheduleViewer from '@/components/ScheduleViewer';
 import { EmployeeWeekSchedule } from '@/types/schedule';
@@ -34,13 +35,15 @@ export default async function Home() {
         <h1 className="title">📅 Schedule Viewer</h1>
       </header>
 
-      <ScheduleViewer
-        employees={employees}
-        no3Schedule={no3Schedule}
-        westminsterSchedule={westminsterSchedule}
-        employeeSchedules={employeeSchedules}
-        todayDate={todayDate}
-      />
+      <Suspense fallback={<div className="loading">Loading...</div>}>
+        <ScheduleViewer
+          employees={employees}
+          no3Schedule={no3Schedule}
+          westminsterSchedule={westminsterSchedule}
+          employeeSchedules={employeeSchedules}
+          todayDate={todayDate}
+        />
+      </Suspense>
     </main>
   );
 }
