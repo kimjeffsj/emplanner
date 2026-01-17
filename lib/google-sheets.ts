@@ -97,31 +97,31 @@ export async function getWeekSchedule(location: Location): Promise<WeekSchedule>
   // 시트의 모든 셀 로드
   await sheet.loadCells();
 
-  // 2D 배열로 변환
+  // 2D 배열로 변환 (formattedValue 사용 - 날짜/시간이 올바른 형식으로 표시됨)
   const data: string[][] = [];
 
   // 헤더 행 (요일)
   const headerRow: string[] = [];
   for (let col = 0; col < sheet.columnCount; col++) {
     const cell = sheet.getCell(0, col);
-    headerRow.push(cell.value?.toString() || '');
+    headerRow.push(cell.formattedValue || '');
   }
   data.push(headerRow);
 
-  // 날짜 행
+  // 날짜 행 (formattedValue로 "2026-01-11" 형식 가져오기)
   const dateRow: string[] = [];
   for (let col = 0; col < sheet.columnCount; col++) {
     const cell = sheet.getCell(1, col);
-    dateRow.push(cell.value?.toString() || '');
+    dateRow.push(cell.formattedValue || '');
   }
   data.push(dateRow);
 
-  // 나머지 데이터 행들
+  // 나머지 데이터 행들 (formattedValue로 "11:00", "15:30" 형식 가져오기)
   for (let row = 2; row < sheet.rowCount; row++) {
     const rowData: string[] = [];
     for (let col = 0; col < sheet.columnCount; col++) {
       const cell = sheet.getCell(row, col);
-      rowData.push(cell.value?.toString() || '');
+      rowData.push(cell.formattedValue || '');
     }
     data.push(rowData);
   }
