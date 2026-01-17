@@ -9,7 +9,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { EmployeeWeekSchedule } from "@/types/schedule";
 
 // ISR: 60초마다 revalidate
-export const revalidate = 3600;
+export const revalidate = 60;
 
 export default async function Home() {
   // 오늘 날짜 (YYYY-MM-DD)
