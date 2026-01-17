@@ -73,7 +73,7 @@ export default function PWAInstallBanner() {
       role="banner"
       className="fixed bottom-0 left-0 right-0 z-50 bg-slate-900 text-white p-4 shadow-lg"
     >
-      <div className="max-w-screen-md mx-auto flex items-center justify-between gap-4">
+      <div className="max-w-md mx-auto flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Download className="w-6 h-6 text-blue-400" />
           <div>

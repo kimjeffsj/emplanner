@@ -19,8 +19,6 @@ const EmployeeSelector = dynamic(() => import("./EmployeeSelector"), {
 import LocationTabs from "./LocationTabs";
 import WeeklyGrid from "./WeeklyGrid";
 import PersonalScheduleModal from "./PersonalScheduleModal";
-// import WeekNavigation from "./WeekNavigation"; // 임시 비활성화 - Phase 5 추후 구현
-import { Calendar } from "lucide-react";
 
 interface ScheduleViewerProps {
   employees: Employee[];
@@ -124,27 +122,20 @@ export default function ScheduleViewer({
 
   return (
     <div className="schedule-viewer">
-      {/* Controls Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6">
+      {/* Controls Bar: 로케이션 탭 (좌측) + 직원 드롭다운 (우측) */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
+        <LocationTabs
+          selectedLocation={selectedLocation}
+          onChange={setSelectedLocation}
+        />
         <EmployeeSelector
           employees={employeeNames}
           selectedEmployee={selectedEmployee}
           onChange={handleEmployeeChange}
         />
-        {/* 주간 이동 임시 비활성화 - 날짜 범위만 표시 */}
-        {/* <div className="flex items-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
-          <Calendar className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            {getWeekRange()}
-          </span>
-        </div> */}
       </div>
 
-      {/* 로케이션 탭 + 주간 그리드 (선택된 직원 하이라이트) */}
-      <LocationTabs
-        selectedLocation={selectedLocation}
-        onChange={setSelectedLocation}
-      />
+      {/* 주간 그리드 (선택된 직원 하이라이트) */}
       <WeeklyGrid
         schedule={currentSchedule}
         todayDate={todayDate}
