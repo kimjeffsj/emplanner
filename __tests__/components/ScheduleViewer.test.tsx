@@ -122,20 +122,15 @@ describe("ScheduleViewer", () => {
   });
 
   describe("초기 로드", () => {
-    it("전체 보기가 기본 선택되어 있다", async () => {
-      const user = userEvent.setup();
+    it("전체 직원이 기본 선택되어 있다", async () => {
       render(<ScheduleViewer {...defaultProps} />);
 
-      // dynamic import 로딩 대기 - combobox가 나타날 때까지 기다림
-      const combobox = await screen.findByRole("combobox", {}, { timeout: 3000 });
-      expect(combobox).toBeInTheDocument();
+      // 직원 선택 버튼 찾기
+      const trigger = await screen.findByRole("button", { name: "직원 선택" }, { timeout: 3000 });
+      expect(trigger).toBeInTheDocument();
 
-      // 드롭다운 열어서 '전체 보기'가 선택되어 있는지 확인
-      await user.click(combobox);
-
-      // 옵션에서 '전체 보기'가 존재해야 함
-      const allViewOption = await screen.findByRole("option", { name: "전체 보기" });
-      expect(allViewOption).toBeInTheDocument();
+      // 트리거에 '전체 직원' 텍스트가 표시되어 있어야 함
+      expect(screen.getByText("전체 직원")).toBeInTheDocument();
     });
 
     it("No.3 탭이 기본 선택되어 있다", () => {
@@ -143,7 +138,7 @@ describe("ScheduleViewer", () => {
 
       // No.3 탭이 active 상태여야 함
       const no3Tab = screen.getByRole("tab", { name: "No.3" });
-      expect(no3Tab).toHaveAttribute("data-state", "active");
+      expect(no3Tab).toHaveAttribute("aria-selected", "true");
     });
 
     it("직원 목록이 드롭다운에 로드된다", async () => {
@@ -151,27 +146,26 @@ describe("ScheduleViewer", () => {
       render(<ScheduleViewer {...defaultProps} />);
 
       // 드롭다운 열기
-      const trigger = screen.getByRole("combobox");
+      const trigger = screen.getByRole("button", { name: "직원 선택" });
       await user.click(trigger);
 
-      // 모든 직원이 옵션으로 존재해야 함
+      // 모든 직원이 표시되어야 함 (드롭다운 + 그리드에 표시될 수 있음)
       for (const emp of mockEmployees) {
-        expect(
-          screen.getByRole("option", { name: emp.name })
-        ).toBeInTheDocument();
+        const elements = screen.getAllByText(emp.name);
+        expect(elements.length).toBeGreaterThanOrEqual(1);
       }
     });
 
-    it("전체 보기 옵션이 드롭다운에 존재한다", async () => {
+    it("전체 직원 옵션이 드롭다운에 존재한다", async () => {
       const user = userEvent.setup();
       render(<ScheduleViewer {...defaultProps} />);
 
-      const trigger = screen.getByRole("combobox");
+      const trigger = screen.getByRole("button", { name: "직원 선택" });
       await user.click(trigger);
 
-      expect(
-        screen.getByRole("option", { name: "전체 보기" })
-      ).toBeInTheDocument();
+      // 전체 직원 옵션이 드롭다운에 있어야 함 (trigger + option = 2개)
+      const allTexts = screen.getAllByText("전체 직원");
+      expect(allTexts.length).toBeGreaterThanOrEqual(2);
     });
   });
 
@@ -215,7 +209,7 @@ describe("ScheduleViewer", () => {
       await user.click(westminsterTab);
 
       // Westminster 탭이 active 상태
-      expect(westminsterTab).toHaveAttribute("data-state", "active");
+      expect(westminsterTab).toHaveAttribute("aria-selected", "true");
 
       // Westminster 스케줄의 직원이 그리드에 보여야 함
       const minjiElements = screen.getAllByText("Minji");
@@ -234,98 +228,104 @@ describe("ScheduleViewer", () => {
       await user.click(no3Tab);
 
       // No.3 탭이 active 상태
-      expect(no3Tab).toHaveAttribute("data-state", "active");
+      expect(no3Tab).toHaveAttribute("aria-selected", "true");
     });
   });
 
-  describe("직원 선택", () => {
-    it("직원 선택 시 PersonalSchedule이 표시된다", async () => {
+  describe("직원 선택 (드롭다운 하이라이트 모드)", () => {
+    // 드롭다운에서 옵션 선택하는 헬퍼 함수
+    const selectEmployeeFromDropdown = async (user: ReturnType<typeof userEvent.setup>, employeeName: string) => {
+      const trigger = screen.getByRole("button", { name: "직원 선택" });
+      await user.click(trigger);
+      // 드롭다운 내의 옵션들은 span.font-medium 안에 있음
+      const options = screen.getAllByText(employeeName);
+      // 드롭다운 옵션은 span 태그 안에 있고, 부모가 button임
+      const dropdownOption = options.find(el =>
+        el.tagName === 'SPAN' && el.closest('button')?.classList.contains('w-full')
+      );
+      if (dropdownOption) {
+        await user.click(dropdownOption);
+      }
+    };
+
+    it("직원 선택 시 LocationTabs와 WeeklyGrid는 계속 표시된다", async () => {
       const user = userEvent.setup();
       render(<ScheduleViewer {...defaultProps} />);
 
       // 드롭다운 열고 Jenny 선택
-      const trigger = screen.getByRole("combobox");
-      await user.click(trigger);
-      await user.click(screen.getByRole("option", { name: "Jenny" }));
+      await selectEmployeeFromDropdown(user, "Jenny");
 
-      // PersonalSchedule의 특징: 직원 이름이 헤더에 표시됨
-      // 그리고 LocationTabs가 사라짐
-      expect(screen.queryByRole("tab", { name: "No.3" })).not.toBeInTheDocument();
-
-      // 개인 스케줄 헤더에 이름 표시
-      const headers = screen.getAllByText("Jenny");
-      expect(headers.length).toBeGreaterThan(0);
-    });
-
-    it("직원 선택 시 해당 직원의 스케줄만 표시된다", async () => {
-      const user = userEvent.setup();
-      render(<ScheduleViewer {...defaultProps} />);
-
-      // 드롭다운 열고 Ryan 선택
-      const trigger = screen.getByRole("combobox");
-      await user.click(trigger);
-      await user.click(screen.getByRole("option", { name: "Ryan" }));
-
-      // Ryan의 스케줄이 표시되어야 함
-      const ryanElements = screen.getAllByText("Ryan");
-      expect(ryanElements.length).toBeGreaterThanOrEqual(1);
-
-      // 개인 스케줄 특유의 UI 요소 확인
-      const personalSchedule = document.querySelector(".personal-schedule");
-      expect(personalSchedule).toBeInTheDocument();
-    });
-
-    it("전체 보기로 돌아오면 LocationTabs와 WeeklyGrid가 다시 표시된다", async () => {
-      const user = userEvent.setup();
-      render(<ScheduleViewer {...defaultProps} />);
-
-      // 직원 선택
-      const trigger = screen.getByRole("combobox");
-      await user.click(trigger);
-      await user.click(screen.getByRole("option", { name: "Jenny" }));
-
-      // 전체 보기로 돌아감
-      await user.click(screen.getByRole("combobox"));
-      await user.click(screen.getByRole("option", { name: "전체 보기" }));
-
-      // LocationTabs가 다시 보여야 함
+      // LocationTabs가 여전히 표시되어 있어야 함 (새 디자인: 항상 표시)
       expect(screen.getByRole("tab", { name: "No.3" })).toBeInTheDocument();
       expect(screen.getByRole("tab", { name: "Westminster" })).toBeInTheDocument();
+
+      // WeeklyGrid도 여전히 표시 (요일 헤더 확인)
+      expect(screen.getByText("Sun")).toBeInTheDocument();
+      expect(screen.getByText("Mon")).toBeInTheDocument();
+    });
+
+    it("직원 선택 시 그리드에서 해당 직원이 하이라이트된다", async () => {
+      const user = userEvent.setup();
+      const { container } = render(<ScheduleViewer {...defaultProps} />);
+
+      // 드롭다운 열고 Jenny 선택
+      await selectEmployeeFromDropdown(user, "Jenny");
+
+      // 그리드에서 Jenny 뱃지가 하이라이트 스타일(scale-105)을 가져야 함
+      const jennyBadges = container.querySelectorAll('.employee-badge');
+      const highlightedBadge = Array.from(jennyBadges).find(
+        badge => badge.textContent?.includes('Jenny') && badge.classList.contains('scale-105')
+      );
+      expect(highlightedBadge).toBeInTheDocument();
+    });
+
+    it("전체 직원 선택 시 하이라이트가 해제된다", async () => {
+      const user = userEvent.setup();
+      const { container } = render(<ScheduleViewer {...defaultProps} />);
+
+      // 직원 선택
+      await selectEmployeeFromDropdown(user, "Jenny");
+
+      // 전체 직원으로 돌아감
+      await selectEmployeeFromDropdown(user, "전체 직원");
+
+      // 하이라이트된 뱃지가 없어야 함 (scale-105 클래스 없음)
+      const highlightedBadges = container.querySelectorAll('.employee-badge.scale-105');
+      expect(highlightedBadges.length).toBe(0);
     });
   });
 
   describe("오늘 날짜 전달", () => {
     it("todayDate가 하위 컴포넌트에 전달된다", () => {
-      const { container } = render(<ScheduleViewer {...defaultProps} />);
+      render(<ScheduleViewer {...defaultProps} />);
 
-      // WeeklyGrid에서 today 클래스가 있는 셀이 있어야 함
-      const todayCells = container.querySelectorAll(".today");
-      expect(todayCells.length).toBeGreaterThan(0);
+      // WeeklyGrid에서 오늘 날짜 aria-label 확인
+      const todayColumn = screen.getByRole("columnheader", { name: /Mon 01\/15 \(오늘\)/ });
+      expect(todayColumn).toBeInTheDocument();
     });
   });
 
   describe("URL 쿼리 파라미터", () => {
-    it("URL에 employee 파라미터가 있으면 해당 직원이 선택된다", () => {
+    it("URL에 employee 파라미터가 있으면 해당 직원이 하이라이트된다", () => {
       mockSearchParams = new URLSearchParams("employee=Ryan");
 
-      render(<ScheduleViewer {...defaultProps} />);
+      const { container } = render(<ScheduleViewer {...defaultProps} />);
 
-      // PersonalSchedule이 표시되어야 함
-      const personalSchedule = document.querySelector(".personal-schedule");
-      expect(personalSchedule).toBeInTheDocument();
-
-      // PersonalSchedule 내에 Ryan 이름이 표시되어 있어야 함
-      const employeeName = personalSchedule?.querySelector('[data-slot="card-title"]');
-      expect(employeeName).toHaveTextContent("Ryan");
+      // Ryan이 그리드에서 하이라이트 되어 있어야 함 (scale-105 클래스)
+      const ryanBadges = container.querySelectorAll('.employee-badge');
+      const highlightedBadge = Array.from(ryanBadges).find(
+        badge => badge.textContent?.includes('Ryan') && badge.classList.contains('scale-105')
+      );
+      expect(highlightedBadge).toBeInTheDocument();
     });
 
-    it("존재하지 않는 직원 이름이 URL에 있으면 전체 보기가 표시된다", () => {
+    it("존재하지 않는 직원 이름이 URL에 있으면 전체 직원이 표시된다", () => {
       mockSearchParams = new URLSearchParams("employee=NonExistent");
 
       render(<ScheduleViewer {...defaultProps} />);
 
-      // 전체 보기가 표시되어 있어야 함
-      expect(screen.getByText("전체 보기")).toBeInTheDocument();
+      // 전체 직원이 표시되어 있어야 함
+      expect(screen.getByText("전체 직원")).toBeInTheDocument();
     });
 
     it("직원 선택 시 URL이 업데이트된다", async () => {
@@ -333,9 +333,16 @@ describe("ScheduleViewer", () => {
       render(<ScheduleViewer {...defaultProps} />);
 
       // 드롭다운 열고 Jenny 선택
-      const trigger = screen.getByRole("combobox");
+      const trigger = screen.getByRole("button", { name: "직원 선택" });
       await user.click(trigger);
-      await user.click(screen.getByRole("option", { name: "Jenny" }));
+      // 드롭다운 내의 Jenny 옵션 선택
+      const jennyOptions = screen.getAllByText("Jenny");
+      const dropdownOption = jennyOptions.find(el =>
+        el.tagName === 'SPAN' && el.closest('button')?.classList.contains('w-full')
+      );
+      if (dropdownOption) {
+        await user.click(dropdownOption);
+      }
 
       // router.replace가 호출되어야 함
       expect(mockReplace).toHaveBeenCalledWith("?employee=Jenny", {
@@ -343,16 +350,23 @@ describe("ScheduleViewer", () => {
       });
     });
 
-    it("전체 보기 선택 시 URL에서 파라미터가 제거된다", async () => {
+    it("전체 직원 선택 시 URL에서 파라미터가 제거된다", async () => {
       const user = userEvent.setup();
       mockSearchParams = new URLSearchParams("employee=Ryan");
 
       render(<ScheduleViewer {...defaultProps} />);
 
-      // 전체 보기로 변경
-      const trigger = screen.getByRole("combobox");
+      // 전체 직원으로 변경
+      const trigger = screen.getByRole("button", { name: "직원 선택" });
       await user.click(trigger);
-      await user.click(screen.getByRole("option", { name: "전체 보기" }));
+      // 드롭다운 내의 전체 직원 옵션 선택
+      const allOptions = screen.getAllByText("전체 직원");
+      const dropdownOption = allOptions.find(el =>
+        el.tagName === 'SPAN' && el.closest('button')?.classList.contains('w-full')
+      );
+      if (dropdownOption) {
+        await user.click(dropdownOption);
+      }
 
       // router.replace가 '/'로 호출되어야 함
       expect(mockReplace).toHaveBeenCalledWith("/", { scroll: false });

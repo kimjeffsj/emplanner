@@ -30,7 +30,7 @@ describe("LocationTabs", () => {
       render(<LocationTabs selectedLocation="No.3" onChange={mockOnChange} />);
 
       const no3Tab = screen.getByRole("tab", { name: "No.3" });
-      expect(no3Tab).toHaveAttribute("data-state", "active");
+      expect(no3Tab).toHaveAttribute("aria-selected", "true");
     });
 
     it("should mark Westminster tab as active when selected", () => {
@@ -39,14 +39,14 @@ describe("LocationTabs", () => {
       );
 
       const westminsterTab = screen.getByRole("tab", { name: "Westminster" });
-      expect(westminsterTab).toHaveAttribute("data-state", "active");
+      expect(westminsterTab).toHaveAttribute("aria-selected", "true");
     });
 
     it("should not mark non-selected tab as active", () => {
       render(<LocationTabs selectedLocation="No.3" onChange={mockOnChange} />);
 
       const westminsterTab = screen.getByRole("tab", { name: "Westminster" });
-      expect(westminsterTab).toHaveAttribute("data-state", "inactive");
+      expect(westminsterTab).toHaveAttribute("aria-selected", "false");
     });
   });
 
@@ -73,15 +73,15 @@ describe("LocationTabs", () => {
       expect(mockOnChange).toHaveBeenCalledWith("Westminster");
     });
 
-    it("should not call onChange when clicking the already active tab", async () => {
-      // Radix Tabs does not trigger onChange for already active tab
+    it("should call onChange when clicking the already active tab", async () => {
+      // Custom tabs component triggers onChange even for already active tab
       const user = userEvent.setup();
       render(<LocationTabs selectedLocation="No.3" onChange={mockOnChange} />);
 
       const no3Tab = screen.getByRole("tab", { name: "No.3" });
       await user.click(no3Tab);
 
-      expect(mockOnChange).not.toHaveBeenCalled();
+      expect(mockOnChange).toHaveBeenCalledWith("No.3");
     });
   });
 });

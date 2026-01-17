@@ -13,12 +13,13 @@ import {
 const EmployeeSelector = dynamic(() => import("./EmployeeSelector"), {
   ssr: false,
   loading: () => (
-    <div className="h-9 w-[180px] rounded-md border bg-transparent animate-pulse" />
+    <div className="h-14 w-55 rounded-xl border bg-white dark:bg-gray-800 animate-pulse" />
   ),
 });
 import LocationTabs from "./LocationTabs";
 import WeeklyGrid from "./WeeklyGrid";
-import PersonalSchedule from "./PersonalSchedule";
+import PersonalScheduleModal from "./PersonalScheduleModal";
+import WeekNavigation from "./WeekNavigation";
 
 interface ScheduleViewerProps {
   employees: Employee[];
@@ -41,7 +42,7 @@ export default function ScheduleViewer({
   // URL에서 초기값 읽기
   const initialEmployee = searchParams.get("employee");
 
-  // 상태 관리: 선택된 직원 (null = 전체 보기)
+  // 상태 관리: 선택된 직원 (null = 전체 보기, 하이라이트 용)
   const [selectedEmployee, setSelectedEmployee] = useState<string | null>(
     initialEmployee && employees.some((e) => e.name === initialEmployee)
       ? initialEmployee
@@ -51,6 +52,10 @@ export default function ScheduleViewer({
   // 상태 관리: 선택된 탭 (기본: No.3)
   const [selectedLocation, setSelectedLocation] = useState<Location>("No.3");
 
+  // 상태 관리: 모달 (이름 클릭 시 열림)
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalEmployee, setModalEmployee] = useState<string | null>(null);
+
   // 직원 이름 목록 추출
   const employeeNames = employees.map((e) => e.name);
 
@@ -58,12 +63,12 @@ export default function ScheduleViewer({
   const currentSchedule =
     selectedLocation === "No.3" ? no3Schedule : westminsterSchedule;
 
-  // 선택된 직원의 개인 스케줄
-  const personalSchedule = selectedEmployee
-    ? employeeSchedules[selectedEmployee]
+  // 모달용 개인 스케줄
+  const modalSchedule = modalEmployee
+    ? employeeSchedules[modalEmployee]
     : null;
 
-  // 직원 선택 변경 시 URL 업데이트
+  // 직원 선택 변경 시 URL 업데이트 (드롭다운에서 선택)
   const handleEmployeeChange = (employee: string | null) => {
     setSelectedEmployee(employee);
 
@@ -77,6 +82,18 @@ export default function ScheduleViewer({
     }
   };
 
+  // 그리드에서 직원 이름 클릭 시 모달 열기
+  const handleEmployeeClick = (employeeName: string) => {
+    setModalEmployee(employeeName);
+    setIsModalOpen(true);
+  };
+
+  // 모달 닫기
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setModalEmployee(null);
+  };
+
   // URL 파라미터 변경 감지 (브라우저 뒤로/앞으로 버튼)
   useEffect(() => {
     const employeeFromUrl = searchParams.get("employee");
@@ -87,33 +104,57 @@ export default function ScheduleViewer({
     }
   }, [searchParams, employees]);
 
+  // 주간 네비게이션을 위한 weekStart 계산
+  const weekStart = currentSchedule.weekStart || new Date().toISOString().split('T')[0];
+
+  // 주간 네비게이션 핸들러 (Phase 5 스킵됨 - 추후 구현)
+  // 구현 방향: URL ?week=YYYY-MM-DD 파라미터로 Google Sheets API fetch
+  // Vercel ISR 활용하여 서버 비용 없이 캐싱 가능
+  const handlePreviousWeek = () => {
+    // TODO: ?week 쿼리 파라미터로 이전 주 데이터 요청
+    console.log('Previous week - Phase 5 skipped');
+  };
+
+  const handleNextWeek = () => {
+    // TODO: ?week 쿼리 파라미터로 다음 주 데이터 요청
+    console.log('Next week - Phase 5 skipped');
+  };
+
   return (
     <div className="schedule-viewer">
-      {/* 직원 선택 드롭다운 */}
-      <div className="selector-container">
+      {/* Controls Bar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6">
         <EmployeeSelector
           employees={employeeNames}
           selectedEmployee={selectedEmployee}
           onChange={handleEmployeeChange}
         />
+        <WeekNavigation
+          weekStart={weekStart}
+          onPreviousWeek={handlePreviousWeek}
+          onNextWeek={handleNextWeek}
+        />
       </div>
 
-      {/* 조건부 렌더링: 전체 보기 vs 개인 스케줄 */}
-      {selectedEmployee === null ? (
-        // 전체 보기: 로케이션 탭 + 주간 그리드
-        <>
-          <LocationTabs
-            selectedLocation={selectedLocation}
-            onChange={setSelectedLocation}
-          />
-          <WeeklyGrid schedule={currentSchedule} todayDate={todayDate} />
-        </>
-      ) : (
-        // 개인 스케줄: PersonalSchedule 컴포넌트
-        personalSchedule && (
-          <PersonalSchedule schedule={personalSchedule} todayDate={todayDate} />
-        )
-      )}
+      {/* 로케이션 탭 + 주간 그리드 (선택된 직원 하이라이트) */}
+      <LocationTabs
+        selectedLocation={selectedLocation}
+        onChange={setSelectedLocation}
+      />
+      <WeeklyGrid
+        schedule={currentSchedule}
+        todayDate={todayDate}
+        selectedEmployee={selectedEmployee}
+        onEmployeeClick={handleEmployeeClick}
+      />
+
+      {/* PersonalSchedule 모달 */}
+      <PersonalScheduleModal
+        schedule={modalSchedule}
+        todayDate={todayDate}
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+      />
     </div>
   );
 }

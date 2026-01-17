@@ -97,7 +97,8 @@ describe("WeeklyGrid", () => {
 
     it("note가 있는 직원은 note를 함께 표시한다", () => {
       render(<WeeklyGrid schedule={mockWeekSchedule} />);
-      expect(screen.getByText(/from 17:30/)).toBeInTheDocument();
+      // Note format: (type + time) e.g., (from17:30)
+      expect(screen.getByText(/\(from17:30\)/)).toBeInTheDocument();
     });
   });
 
@@ -120,28 +121,31 @@ describe("WeeklyGrid", () => {
   });
 
   describe("오늘 날짜 강조", () => {
-    it("todayDate prop과 일치하는 컬럼에 today 클래스가 적용된다", () => {
-      const { container } = render(
+    it("todayDate prop과 일치하는 컬럼에 오늘 표시가 있다", () => {
+      render(
         <WeeklyGrid schedule={mockWeekSchedule} todayDate="2024-01-15" />
       );
 
-      const todayColumn = container.querySelector(".day-column.today");
+      // aria-label에 (오늘) 표시 확인
+      const todayColumn = screen.getByRole("columnheader", { name: /Mon 01\/15 \(오늘\)/ });
       expect(todayColumn).toBeInTheDocument();
     });
 
-    it("todayDate가 주 범위에 없으면 today 클래스가 없다", () => {
-      const { container } = render(
+    it("todayDate가 주 범위에 없으면 오늘 표시가 없다", () => {
+      render(
         <WeeklyGrid schedule={mockWeekSchedule} todayDate="2024-01-25" />
       );
 
-      const todayColumn = container.querySelector(".day-column.today");
+      // (오늘) 표시가 있는 컬럼이 없어야 함
+      const todayColumn = screen.queryByRole("columnheader", { name: /\(오늘\)/ });
       expect(todayColumn).not.toBeInTheDocument();
     });
 
-    it("todayDate가 없으면 today 클래스가 없다", () => {
-      const { container } = render(<WeeklyGrid schedule={mockWeekSchedule} />);
+    it("todayDate가 없으면 오늘 표시가 없다", () => {
+      render(<WeeklyGrid schedule={mockWeekSchedule} />);
 
-      const todayColumn = container.querySelector(".day-column.today");
+      // (오늘) 표시가 있는 컬럼이 없어야 함
+      const todayColumn = screen.queryByRole("columnheader", { name: /\(오늘\)/ });
       expect(todayColumn).not.toBeInTheDocument();
     });
   });

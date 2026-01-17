@@ -5,6 +5,7 @@ import {
   getEmployeeSchedule,
 } from "@/lib/google-sheets";
 import ScheduleViewer from "@/components/ScheduleViewer";
+import ThemeToggle from "@/components/ThemeToggle";
 import { EmployeeWeekSchedule } from "@/types/schedule";
 
 // ISR: 60초마다 revalidate
@@ -33,20 +34,32 @@ export default async function Home() {
   });
 
   return (
-    <main className="main-container">
-      <header className="header">
-        <h1 className="title">📅 Schedule Viewer</h1>
-      </header>
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors">
+      {/* Main Container */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/* Header */}
+        <header className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+              스케줄
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              직원 근무 일정 관리
+            </p>
+          </div>
+          <ThemeToggle />
+        </header>
 
-      <Suspense fallback={<div className="loading">Loading...</div>}>
-        <ScheduleViewer
-          employees={employees}
-          no3Schedule={no3Schedule}
-          westminsterSchedule={westminsterSchedule}
-          employeeSchedules={employeeSchedules}
-          todayDate={todayDate}
-        />
-      </Suspense>
+        <Suspense fallback={<div className="loading">Loading...</div>}>
+          <ScheduleViewer
+            employees={employees}
+            no3Schedule={no3Schedule}
+            westminsterSchedule={westminsterSchedule}
+            employeeSchedules={employeeSchedules}
+            todayDate={todayDate}
+          />
+        </Suspense>
+      </div>
     </main>
   );
 }

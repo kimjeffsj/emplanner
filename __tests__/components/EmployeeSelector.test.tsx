@@ -11,7 +11,7 @@ describe("EmployeeSelector", () => {
   });
 
   describe("Initial rendering", () => {
-    it('should display "전체 보기" as default value', () => {
+    it('should display "전체 직원" as default value', () => {
       render(
         <EmployeeSelector
           employees={mockEmployees}
@@ -20,8 +20,9 @@ describe("EmployeeSelector", () => {
         />
       );
 
-      expect(screen.getByRole("combobox")).toBeInTheDocument();
-      expect(screen.getByText("전체 보기")).toBeInTheDocument();
+      const trigger = screen.getByRole("button", { name: "직원 선택" });
+      expect(trigger).toBeInTheDocument();
+      expect(screen.getByText("전체 직원")).toBeInTheDocument();
     });
   });
 
@@ -36,14 +37,15 @@ describe("EmployeeSelector", () => {
         />
       );
 
-      const trigger = screen.getByRole("combobox");
+      const trigger = screen.getByRole("button", { name: "직원 선택" });
       await user.click(trigger);
 
-      expect(screen.getByRole("option", { name: "전체 보기" })).toBeInTheDocument();
-      expect(screen.getByRole("option", { name: "Ryan" })).toBeInTheDocument();
-      expect(screen.getByRole("option", { name: "Jenny" })).toBeInTheDocument();
-      expect(screen.getByRole("option", { name: "Minji" })).toBeInTheDocument();
-      expect(screen.getByRole("option", { name: "Hyeonwoo" })).toBeInTheDocument();
+      // 전체 직원 옵션과 모든 직원이 표시되어야 함
+      expect(screen.getAllByText("전체 직원")).toHaveLength(2); // trigger + option
+      expect(screen.getByText("Ryan")).toBeInTheDocument();
+      expect(screen.getByText("Jenny")).toBeInTheDocument();
+      expect(screen.getByText("Minji")).toBeInTheDocument();
+      expect(screen.getByText("Hyeonwoo")).toBeInTheDocument();
     });
   });
 
@@ -58,17 +60,17 @@ describe("EmployeeSelector", () => {
         />
       );
 
-      const trigger = screen.getByRole("combobox");
+      const trigger = screen.getByRole("button", { name: "직원 선택" });
       await user.click(trigger);
 
-      const ryanOption = screen.getByRole("option", { name: "Ryan" });
+      const ryanOption = screen.getByText("Ryan");
       await user.click(ryanOption);
 
       expect(mockOnChange).toHaveBeenCalledWith("Ryan");
       expect(mockOnChange).toHaveBeenCalledTimes(1);
     });
 
-    it('should call onChange with null when selecting "전체 보기"', async () => {
+    it('should call onChange with null when selecting "전체 직원"', async () => {
       const user = userEvent.setup();
       render(
         <EmployeeSelector
@@ -78,11 +80,13 @@ describe("EmployeeSelector", () => {
         />
       );
 
-      const trigger = screen.getByRole("combobox");
+      const trigger = screen.getByRole("button", { name: "직원 선택" });
       await user.click(trigger);
 
-      const allOption = screen.getByRole("option", { name: "전체 보기" });
-      await user.click(allOption);
+      // 드롭다운 내의 "전체 직원" 옵션 클릭 (두 번째 "전체 직원" 텍스트)
+      const allOptions = screen.getAllByText("전체 직원");
+      // trigger에 있는 건 "Ryan"이 표시되므로 드롭다운에서만 "전체 직원" 찾음
+      await user.click(allOptions[0]);
 
       expect(mockOnChange).toHaveBeenCalledWith(null);
       expect(mockOnChange).toHaveBeenCalledTimes(1);
@@ -112,12 +116,12 @@ describe("EmployeeSelector", () => {
         />
       );
 
-      const trigger = screen.getByRole("combobox");
+      const trigger = screen.getByRole("button", { name: "직원 선택" });
       await user.click(trigger);
 
-      const options = screen.getAllByRole("option");
-      expect(options).toHaveLength(1);
-      expect(screen.getByRole("option", { name: "전체 보기" })).toBeInTheDocument();
+      // 전체 직원 옵션만 있어야 함 (trigger + dropdown option)
+      const allEmployeeTexts = screen.getAllByText("전체 직원");
+      expect(allEmployeeTexts).toHaveLength(2);
     });
   });
 });
