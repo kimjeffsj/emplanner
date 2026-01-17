@@ -66,15 +66,15 @@ export default function WeeklyGrid({
     >
       {/* Scrollable inner container with minimum width for mobile */}
       <div
-        className="min-w-[700px] sm:min-w-0 bg-gray-200 dark:bg-gray-700 rounded-xl overflow-hidden"
+        className="min-w-[840px] sm:min-w-0 bg-gray-200 dark:bg-gray-700 rounded-xl overflow-hidden"
         role="table"
         aria-label="주간 근무 스케줄"
       >
         {/* Header row with days and dates */}
-        <div className="grid grid-cols-8 gap-px" role="row">
+        <div className="grid grid-cols-8 gap-px border-b border-gray-300 dark:border-gray-600" role="row">
           {/* Empty corner cell */}
           <div
-            className="bg-gray-50 dark:bg-gray-800 p-3"
+            className="bg-gray-50 dark:bg-gray-800 p-3 border-r border-gray-200 dark:border-gray-700"
             role="columnheader"
             aria-label="시프트 유형"
           />
@@ -85,6 +85,7 @@ export default function WeeklyGrid({
               aria-label={`${DAYS[index]} ${formatDate(date)}${isToday(date) ? ' (오늘)' : ''}`}
               className={cn(
                 'flex flex-col items-center p-3 text-center transition-colors',
+                'border-r border-gray-200 dark:border-gray-700 last:border-r-0',
                 isToday(date)
                   ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
                   : 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
@@ -104,11 +105,14 @@ export default function WeeklyGrid({
         </div>
 
         {/* Rows for each shift type */}
-        {SHIFTS.map((shift) => (
-          <div key={shift.type} className="grid grid-cols-8 gap-px" role="row">
+        {SHIFTS.map((shift, shiftIndex) => (
+          <div key={shift.type} className={cn(
+            "grid grid-cols-8 gap-px",
+            shiftIndex < SHIFTS.length - 1 && "border-b border-gray-300 dark:border-gray-600"
+          )} role="row">
             {/* Shift label cell */}
             <div
-              className="bg-gray-50 dark:bg-gray-800 flex items-center justify-center font-medium text-sm p-3 text-gray-700 dark:text-gray-300"
+              className="bg-gray-50 dark:bg-gray-800 flex items-center justify-center font-medium text-sm p-3 text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700"
               role="rowheader"
             >
               {shift.label}
@@ -128,13 +132,14 @@ export default function WeeklyGrid({
                   role="cell"
                   aria-label={cellLabel}
                   className={cn(
-                    'min-h-[80px] p-2 transition-colors',
+                    'min-h-[80px] p-3 transition-colors',
+                    'border-r border-gray-200 dark:border-gray-700 last:border-r-0',
                     today
                       ? 'bg-gray-800 dark:bg-gray-200'
                       : 'bg-white dark:bg-gray-900'
                   )}
                 >
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-col gap-1.5">
                     {entries.map((entry, idx) => {
                       const highlighted = shouldHighlight(entry.name);
                       return (
@@ -142,7 +147,7 @@ export default function WeeklyGrid({
                           key={`${entry.name}-${idx}`}
                           onClick={() => handleEmployeeClick(entry.name)}
                           className={cn(
-                            'employee-badge px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer',
+                            'employee-badge px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap',
                             'hover:shadow-md active:scale-95',
                             highlighted
                               ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 shadow-md scale-105'
@@ -161,7 +166,7 @@ export default function WeeklyGrid({
                                 ? 'text-gray-300 dark:text-gray-600'
                                 : 'text-gray-500 dark:text-gray-400'
                             )}>
-                              ({entry.note.type}{entry.note.time})
+                              ({entry.note.type} {entry.note.time})
                             </span>
                           )}
                         </button>

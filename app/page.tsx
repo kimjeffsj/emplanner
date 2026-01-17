@@ -12,8 +12,9 @@ import { EmployeeWeekSchedule } from "@/types/schedule";
 export const revalidate = 60;
 
 export default async function Home() {
-  // 오늘 날짜 (YYYY-MM-DD)
-  const todayDate = new Date().toISOString().split("T")[0];
+  // 오늘 날짜 (YYYY-MM-DD) - 로컬 시간 기준
+  const now = new Date();
+  const todayDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
   // 데이터 fetching (Server Component에서 실행)
   const [employees, no3Schedule, westminsterSchedule] = await Promise.all([

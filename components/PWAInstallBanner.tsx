@@ -1,29 +1,31 @@
-// components/PWAInstallBanner.tsx
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { X, Download } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { X, Download } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-const STORAGE_KEY = 'pwa-banner-dismissed';
+const STORAGE_KEY = "pwa-banner-dismissed";
 
 export default function PWAInstallBanner() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
     // 이미 설치된 경우 (standalone 모드) 배너 숨김
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    const isStandalone = window.matchMedia(
+      "(display-mode: standalone)"
+    ).matches;
     if (isStandalone) {
       return;
     }
 
     // 이전에 닫기를 누른 경우 배너 숨김
-    const isDismissed = localStorage.getItem(STORAGE_KEY) === 'true';
+    const isDismissed = localStorage.getItem(STORAGE_KEY) === "true";
     if (isDismissed) {
       return;
     }
@@ -35,10 +37,13 @@ export default function PWAInstallBanner() {
       setShowBanner(true);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt
+      );
     };
   }, []);
 
@@ -48,7 +53,7 @@ export default function PWAInstallBanner() {
     await deferredPrompt.prompt();
     const choiceResult = await deferredPrompt.userChoice;
 
-    if (choiceResult.outcome === 'accepted') {
+    if (choiceResult.outcome === "accepted") {
       setShowBanner(false);
       setDeferredPrompt(null);
     }
@@ -56,7 +61,7 @@ export default function PWAInstallBanner() {
 
   const handleDismiss = () => {
     setShowBanner(false);
-    localStorage.setItem(STORAGE_KEY, 'true');
+    localStorage.setItem(STORAGE_KEY, "true");
   };
 
   if (!showBanner) {

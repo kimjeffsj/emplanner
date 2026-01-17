@@ -19,7 +19,8 @@ const EmployeeSelector = dynamic(() => import("./EmployeeSelector"), {
 import LocationTabs from "./LocationTabs";
 import WeeklyGrid from "./WeeklyGrid";
 import PersonalScheduleModal from "./PersonalScheduleModal";
-import WeekNavigation from "./WeekNavigation";
+// import WeekNavigation from "./WeekNavigation"; // 임시 비활성화 - Phase 5 추후 구현
+import { Calendar } from "lucide-react";
 
 interface ScheduleViewerProps {
   employees: Employee[];
@@ -64,9 +65,7 @@ export default function ScheduleViewer({
     selectedLocation === "No.3" ? no3Schedule : westminsterSchedule;
 
   // 모달용 개인 스케줄
-  const modalSchedule = modalEmployee
-    ? employeeSchedules[modalEmployee]
-    : null;
+  const modalSchedule = modalEmployee ? employeeSchedules[modalEmployee] : null;
 
   // 직원 선택 변경 시 URL 업데이트 (드롭다운에서 선택)
   const handleEmployeeChange = (employee: string | null) => {
@@ -104,20 +103,23 @@ export default function ScheduleViewer({
     }
   }, [searchParams, employees]);
 
-  // 주간 네비게이션을 위한 weekStart 계산
-  const weekStart = currentSchedule.weekStart || new Date().toISOString().split('T')[0];
+  // 주간 날짜 범위 계산
+  const weekStart =
+    currentSchedule.weekStart || new Date().toISOString().split("T")[0];
 
-  // 주간 네비게이션 핸들러 (Phase 5 스킵됨 - 추후 구현)
-  // 구현 방향: URL ?week=YYYY-MM-DD 파라미터로 Google Sheets API fetch
-  // Vercel ISR 활용하여 서버 비용 없이 캐싱 가능
-  const handlePreviousWeek = () => {
-    // TODO: ?week 쿼리 파라미터로 이전 주 데이터 요청
-    console.log('Previous week - Phase 5 skipped');
-  };
+  const getWeekRange = (): string => {
+    const start = new Date(weekStart);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
 
-  const handleNextWeek = () => {
-    // TODO: ?week 쿼리 파라미터로 다음 주 데이터 요청
-    console.log('Next week - Phase 5 skipped');
+    const formatDate = (d: Date) => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}.${month}.${day}`;
+    };
+
+    return `${formatDate(start)} - ${formatDate(end)}`;
   };
 
   return (
@@ -129,11 +131,13 @@ export default function ScheduleViewer({
           selectedEmployee={selectedEmployee}
           onChange={handleEmployeeChange}
         />
-        <WeekNavigation
-          weekStart={weekStart}
-          onPreviousWeek={handlePreviousWeek}
-          onNextWeek={handleNextWeek}
-        />
+        {/* 주간 이동 임시 비활성화 - 날짜 범위만 표시 */}
+        {/* <div className="flex items-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
+          <Calendar className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {getWeekRange()}
+          </span>
+        </div> */}
       </div>
 
       {/* 로케이션 탭 + 주간 그리드 (선택된 직원 하이라이트) */}
