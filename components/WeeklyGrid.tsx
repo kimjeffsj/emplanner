@@ -1,7 +1,12 @@
-'use client';
+"use client";
 
-import { WeekSchedule, ScheduleEntry, ShiftType } from '@/types/schedule';
-import { cn } from '@/lib/utils';
+import {
+  WeekSchedule,
+  ScheduleEntry,
+  ShiftType,
+  TimeNote,
+} from "@/types/schedule";
+import { cn } from "@/lib/utils";
 
 interface WeeklyGridProps {
   schedule: WeekSchedule;
@@ -10,18 +15,18 @@ interface WeeklyGridProps {
   onEmployeeClick?: (employeeName: string) => void;
 }
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const SHIFTS: { type: ShiftType; label: string }[] = [
-  { type: '*', label: 'All day' },
-  { type: '11:00', label: '11:00~' },
-  { type: '15:30', label: '15:30~' },
+  { type: "*", label: "All day" },
+  { type: "11:00", label: "11:00~" },
+  { type: "15:30", label: "15:30~" },
 ];
 
 export default function WeeklyGrid({
   schedule,
   todayDate,
   selectedEmployee,
-  onEmployeeClick
+  onEmployeeClick,
 }: WeeklyGridProps) {
   // Generate array of 7 dates for the week
   const weekDates = generateWeekDates(schedule.weekStart);
@@ -31,8 +36,15 @@ export default function WeeklyGrid({
 
   // Format date string to MM/DD
   const formatDate = (dateStr: string): string => {
-    const [, month, day] = dateStr.split('-');
+    const [, month, day] = dateStr.split("-");
     return `${month}/${day}`;
+  };
+
+  // Format note string
+  const formatNote = (note: TimeNote): string => {
+    if (note.type === "until") return `~${note.time}`;
+    if (note.type === "from") return `${note.time}~`;
+    return note.time;
   };
 
   // Check if a date matches today
@@ -71,7 +83,10 @@ export default function WeeklyGrid({
         aria-label="주간 근무 스케줄"
       >
         {/* Header row with days and dates */}
-        <div className="grid grid-cols-8 gap-px border-b border-gray-300 dark:border-gray-600" role="row">
+        <div
+          className="grid grid-cols-8 gap-px border-b border-gray-300 dark:border-gray-600"
+          role="row"
+        >
           {/* Empty corner cell */}
           <div
             className="bg-gray-50 dark:bg-gray-800 p-3 border-r border-gray-200 dark:border-gray-700"
@@ -82,22 +97,24 @@ export default function WeeklyGrid({
             <div
               key={date}
               role="columnheader"
-              aria-label={`${DAYS[index]} ${formatDate(date)}${isToday(date) ? ' (오늘)' : ''}`}
+              aria-label={`${DAYS[index]} ${formatDate(date)}${isToday(date) ? " (오늘)" : ""}`}
               className={cn(
-                'flex flex-col items-center p-3 text-center transition-colors',
-                'border-r border-gray-200 dark:border-gray-700 last:border-r-0',
+                "flex flex-col items-center p-3 text-center transition-colors",
+                "border-r border-gray-200 dark:border-gray-700 last:border-r-0",
                 isToday(date)
-                  ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
-                  : 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+                  ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900"
+                  : "bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               )}
             >
               <span className="font-semibold text-sm">{DAYS[index]}</span>
-              <span className={cn(
-                'text-xs',
-                isToday(date)
-                  ? 'text-gray-300 dark:text-gray-600'
-                  : 'text-gray-500 dark:text-gray-400'
-              )}>
+              <span
+                className={cn(
+                  "text-xs",
+                  isToday(date)
+                    ? "text-gray-300 dark:text-gray-600"
+                    : "text-gray-500 dark:text-gray-400"
+                )}
+              >
                 {formatDate(date)}
               </span>
             </div>
@@ -106,10 +123,15 @@ export default function WeeklyGrid({
 
         {/* Rows for each shift type */}
         {SHIFTS.map((shift, shiftIndex) => (
-          <div key={shift.type} className={cn(
-            "grid grid-cols-8 gap-px",
-            shiftIndex < SHIFTS.length - 1 && "border-b border-gray-300 dark:border-gray-600"
-          )} role="row">
+          <div
+            key={shift.type}
+            className={cn(
+              "grid grid-cols-8 gap-px",
+              shiftIndex < SHIFTS.length - 1 &&
+                "border-b border-gray-300 dark:border-gray-600"
+            )}
+            role="row"
+          >
             {/* Shift label cell */}
             <div
               className="bg-gray-50 dark:bg-gray-800 flex items-center justify-center font-medium text-sm p-3 text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700"
@@ -121,9 +143,10 @@ export default function WeeklyGrid({
             {/* Day cells */}
             {weekDates.map((date, index) => {
               const entries = getEntries(date, shift.type);
-              const cellLabel = entries.length > 0
-                ? `${DAYS[index]} ${shift.label}: ${entries.map(e => e.name).join(', ')}`
-                : `${DAYS[index]} ${shift.label}: 근무자 없음`;
+              const cellLabel =
+                entries.length > 0
+                  ? `${DAYS[index]} ${shift.label}: ${entries.map((e) => e.name).join(", ")}`
+                  : `${DAYS[index]} ${shift.label}: 근무자 없음`;
               const today = isToday(date);
 
               return (
@@ -132,11 +155,11 @@ export default function WeeklyGrid({
                   role="cell"
                   aria-label={cellLabel}
                   className={cn(
-                    'min-h-[80px] p-3 transition-colors',
-                    'border-r border-gray-200 dark:border-gray-700 last:border-r-0',
+                    "min-h-[80px] p-3 transition-colors",
+                    "border-r border-gray-200 dark:border-gray-700 last:border-r-0",
                     today
-                      ? 'bg-gray-800 dark:bg-gray-200'
-                      : 'bg-white dark:bg-gray-900'
+                      ? "bg-gray-800 dark:bg-gray-200"
+                      : "bg-white dark:bg-gray-900"
                   )}
                 >
                   <div className="flex flex-col gap-1.5">
@@ -147,26 +170,28 @@ export default function WeeklyGrid({
                           key={`${entry.name}-${idx}`}
                           onClick={() => handleEmployeeClick(entry.name)}
                           className={cn(
-                            'employee-badge px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap',
-                            'hover:shadow-md active:scale-95',
+                            "employee-badge px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap",
+                            "hover:shadow-md active:scale-95",
                             highlighted
-                              ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 shadow-md scale-105'
+                              ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 shadow-md scale-105"
                               : today
-                                ? 'bg-gray-700 dark:bg-gray-300 text-white dark:text-gray-900 hover:bg-gray-600 dark:hover:bg-gray-400'
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                ? "bg-gray-700 dark:bg-gray-300 text-white dark:text-gray-900 hover:bg-gray-600 dark:hover:bg-gray-400"
+                                : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600"
                           )}
                           aria-label={`${entry.name} 클릭하여 상세 스케줄 보기`}
                           aria-pressed={highlighted}
                         >
                           {entry.name}
                           {entry.note && (
-                            <span className={cn(
-                              'ml-1 text-xs',
-                              highlighted || today
-                                ? 'text-gray-300 dark:text-gray-600'
-                                : 'text-gray-500 dark:text-gray-400'
-                            )}>
-                              ({entry.note.type} {entry.note.time})
+                            <span
+                              className={cn(
+                                "ml-1 text-xs",
+                                highlighted || today
+                                  ? "text-gray-300 dark:text-gray-600"
+                                  : "text-gray-500 dark:text-gray-400"
+                              )}
+                            >
+                              {formatNote(entry.note)}
                             </span>
                           )}
                         </button>
@@ -187,7 +212,7 @@ export default function WeeklyGrid({
 function generateWeekDates(weekStart: string): string[] {
   let startDate: Date;
 
-  if (!weekStart || weekStart.trim() === '') {
+  if (!weekStart || weekStart.trim() === "") {
     const today = new Date();
     startDate = new Date(today);
     startDate.setDate(today.getDate() - today.getDay());
@@ -205,7 +230,7 @@ function generateWeekDates(weekStart: string): string[] {
   for (let i = 0; i < 7; i++) {
     const date = new Date(startDate);
     date.setDate(startDate.getDate() + i);
-    dates.push(date.toISOString().split('T')[0]);
+    dates.push(date.toISOString().split("T")[0]);
   }
 
   return dates;
