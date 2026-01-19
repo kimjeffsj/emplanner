@@ -8,8 +8,9 @@
   background-color: var(--today-highlight) !important;
   border: 2px solid var(--today-border) !important;
   border-radius: var(--radius);
-  box-shadow: 0 0 0 2px var(--today-highlight),
-              0 4px 12px -2px rgba(0, 100, 255, 0.15);
+  box-shadow:
+    0 0 0 2px var(--today-highlight),
+    0 4px 12px -2px rgba(0, 100, 255, 0.15);
 }
 
 .schedule-card.today {
@@ -89,122 +90,124 @@
 :root {
   --radius: 0.75rem;
 
-  /* Brand Colors - 스케줄 앱 (파란색 계열: 신뢰, 명확함) */
-  --background: oklch(0.99 0.002 240);
-  --foreground: oklch(0.15 0.02 240);
+  /* Brand Colors - Zinc/Neutral Theme (Clean & Modern) */
+  --background: oklch(0.98 0 0); /* Pure White/Light Grey */
+  --foreground: oklch(0.12 0 0); /* Almost Black */
 
-  /* Card - 고대비 */
+  /* Card */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.12 0.02 240);
+  --card-foreground: oklch(0.12 0 0);
 
   /* Popover */
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.12 0.02 240);
+  --popover-foreground: oklch(0.12 0 0);
 
-  /* Primary - 진한 파란색 (메인 액션) */
-  --primary: oklch(0.45 0.18 250);
-  --primary-foreground: oklch(0.99 0 0);
+  /* Primary - Zinc 900 (Main Action) */
+  --primary: oklch(0.2 0 0);
+  --primary-foreground: oklch(0.98 0 0);
 
-  /* Secondary - 연한 파란 회색 */
-  --secondary: oklch(0.94 0.02 240);
-  --secondary-foreground: oklch(0.25 0.05 240);
+  /* Secondary - Zinc 100 */
+  --secondary: oklch(0.96 0 0);
+  --secondary-foreground: oklch(0.2 0 0);
 
-  /* Muted - 회색 (보조 텍스트) */
-  --muted: oklch(0.92 0.01 240);
-  --muted-foreground: oklch(0.45 0.02 240);
+  /* Muted - Zinc 200 */
+  --muted: oklch(0.92 0 0);
+  --muted-foreground: oklch(0.45 0 0);
 
-  /* Accent - 밝은 파란색 */
-  --accent: oklch(0.92 0.04 240);
-  --accent-foreground: oklch(0.25 0.05 240);
+  /* Accent - Zinc 100/200 */
+  --accent: oklch(0.96 0 0);
+  --accent-foreground: oklch(0.2 0 0);
 
-  /* Destructive - 빨간색 경고 */
+  /* Destructive */
   --destructive: oklch(0.55 0.22 25);
 
-  /* Border & Input - 고대비 */
-  --border: oklch(0.85 0.02 240);
-  --input: oklch(0.88 0.02 240);
-  --ring: oklch(0.55 0.15 250);
+  /* Border & Input */
+  --border: oklch(0.89 0 0);
+  --input: oklch(0.89 0 0);
+  --ring: oklch(0.2 0 0);
 
-  /* Chart colors */
-  --chart-1: oklch(0.55 0.20 250);
-  --chart-2: oklch(0.60 0.15 180);
-  --chart-3: oklch(0.50 0.12 220);
-  --chart-4: oklch(0.75 0.18 90);
-  --chart-5: oklch(0.65 0.20 30);
+  /* Chart colors (Monochrome/Subtle) */
+  --chart-1: oklch(0.2 0 0);
+  --chart-2: oklch(0.4 0 0);
+  --chart-3: oklch(0.6 0 0);
+  --chart-4: oklch(0.8 0 0);
+  --chart-5: oklch(0.9 0 0);
 
   /* Sidebar */
-  --sidebar: oklch(0.97 0.01 240);
-  --sidebar-foreground: oklch(0.15 0.02 240);
-  --sidebar-primary: oklch(0.45 0.18 250);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.92 0.04 240);
-  --sidebar-accent-foreground: oklch(0.25 0.05 240);
-  --sidebar-border: oklch(0.85 0.02 240);
-  --sidebar-ring: oklch(0.55 0.15 250);
+  --sidebar: oklch(0.98 0 0);
+  --sidebar-foreground: oklch(0.12 0 0);
+  --sidebar-primary: oklch(0.2 0 0);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.96 0 0);
+  --sidebar-accent-foreground: oklch(0.12 0 0);
+  --sidebar-border: oklch(0.89 0 0);
+  --sidebar-ring: oklch(0.2 0 0);
 
-  /* Schedule-specific colors - Pastel version */
-  --shift-allday: #bfdbfe; /* blue-200 pastel */
-  --shift-allday-foreground: #1e40af; /* blue-800 */
-  --shift-morning: #bbf7d0; /* green-200 pastel */
-  --shift-morning-foreground: #166534; /* green-800 */
-  --shift-afternoon: #fde68a; /* amber-200 pastel */
-  --shift-afternoon-foreground: #92400e; /* amber-800 */
-  --today-highlight: oklch(0.92 0.08 250);
-  --today-border: oklch(0.55 0.18 250);
+  /* Schedule-specific colors - Monochrome/Minimal */
+  --shift-allday: #e4e4e7; /* zinc-200 */
+  --shift-allday-foreground: #18181b; /* zinc-900 */
+  --shift-morning: #f4f4f5; /* zinc-100 */
+  --shift-morning-foreground: #27272a; /* zinc-800 */
+  --shift-afternoon: #d4d4d8; /* zinc-300 */
+  --shift-afternoon-foreground: #09090b; /* zinc-950 */
+  --today-highlight: oklch(0.96 0 0); /* Zinc 50 */
+  --today-border: oklch(0.2 0 0);
 
-  /* Dot indicator colors (for Option B) */
+  /* Dot indicator colors - Colorful as requested */
   --dot-allday: #3b82f6; /* blue-500 */
-  --dot-morning: #22c55e; /* green-500 */
+  --dot-morning: #10b981; /* emerald-500 */
   --dot-afternoon: #f59e0b; /* amber-500 */
 }
 
 .dark {
-  /* Reference design gray scale (Tailwind gray) */
-  --background: #111827; /* gray-900 */
-  --foreground: #f9fafb; /* gray-50 */
-  --card: #1f2937; /* gray-800 */
-  --card-foreground: #f9fafb; /* gray-50 */
-  --popover: #1f2937; /* gray-800 */
-  --popover-foreground: #f9fafb; /* gray-50 */
-  --primary: #f3f4f6; /* gray-100 */
-  --primary-foreground: #111827; /* gray-900 */
-  --secondary: #374151; /* gray-700 */
-  --secondary-foreground: #f9fafb; /* gray-50 */
-  --muted: #374151; /* gray-700 */
-  --muted-foreground: #9ca3af; /* gray-400 */
-  --accent: #374151; /* gray-700 */
-  --accent-foreground: #f9fafb; /* gray-50 */
+  /* Zinc Theme Dark Mode */
+  --background: #09090b; /* zinc-950 */
+  --foreground: #fafafa; /* zinc-50 */
+  --card: #18181b; /* zinc-900 */
+  --card-foreground: #fafafa; /* zinc-50 */
+  --popover: #18181b; /* zinc-900 */
+  --popover-foreground: #fafafa; /* zinc-50 */
+  --primary: #fafafa; /* zinc-50 */
+  --primary-foreground: #18181b; /* zinc-900 */
+  --secondary: #27272a; /* zinc-800 */
+  --secondary-foreground: #fafafa; /* zinc-50 */
+  --muted: #27272a; /* zinc-800 */
+  --muted-foreground: #a1a1aa; /* zinc-400 */
+  --accent: #27272a; /* zinc-800 */
+  --accent-foreground: #fafafa; /* zinc-50 */
   --destructive: oklch(0.704 0.191 22.216);
-  --border: #374151; /* gray-700 */
-  --input: #374151; /* gray-700 */
-  --ring: #6b7280; /* gray-500 */
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: #1f2937; /* gray-800 */
-  --sidebar-foreground: #f9fafb; /* gray-50 */
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: #f9fafb; /* gray-50 */
-  --sidebar-accent: #374151; /* gray-700 */
-  --sidebar-accent-foreground: #f9fafb; /* gray-50 */
-  --sidebar-border: #374151; /* gray-700 */
-  --sidebar-ring: #6b7280; /* gray-500 */
+  --border: #27272a; /* zinc-800 */
+  --input: #27272a; /* zinc-800 */
+  --ring: #d4d4d8; /* zinc-300 */
 
-  /* Schedule-specific colors - dark mode pastel */
-  --shift-allday: #93c5fd; /* blue-300 pastel */
-  --shift-allday-foreground: #1e3a8a; /* blue-900 */
-  --shift-morning: #86efac; /* green-300 pastel */
-  --shift-morning-foreground: #14532d; /* green-900 */
-  --shift-afternoon: #fcd34d; /* amber-300 pastel */
-  --shift-afternoon-foreground: #78350f; /* amber-900 */
-  --today-highlight: #1e3a5f; /* dark blue tint */
-  --today-border: #3b82f6; /* blue-500 */
+  --chart-1: oklch(0.98 0 0);
+  --chart-2: oklch(0.8 0 0);
+  --chart-3: oklch(0.6 0 0);
+  --chart-4: oklch(0.4 0 0);
+  --chart-5: oklch(0.2 0 0);
 
-  /* Dot indicator colors - dark mode (with glow) */
+  --sidebar: #18181b; /* zinc-900 */
+  --sidebar-foreground: #fafafa; /* zinc-50 */
+  --sidebar-primary: #fafafa; /* zinc-50 */
+  --sidebar-primary-foreground: #18181b; /* zinc-900 */
+  --sidebar-accent: #27272a; /* zinc-800 */
+  --sidebar-accent-foreground: #fafafa; /* zinc-50 */
+  --sidebar-border: #27272a; /* zinc-800 */
+  --sidebar-ring: #d4d4d8; /* zinc-300 */
+
+  /* Schedule-specific colors */
+  --shift-allday: #27272a; /* zinc-800 */
+  --shift-allday-foreground: #fafafa;
+  --shift-morning: #18181b; /* zinc-900 */
+  --shift-morning-foreground: #e4e4e7;
+  --shift-afternoon: #3f3f46; /* zinc-700 */
+  --shift-afternoon-foreground: #ffffff;
+  --today-highlight: #18181b; /* zinc-900 */
+  --today-border: #52525b; /* zinc-600 */
+
+  /* Dot indicator colors - Dark Mode Colorful */
   --dot-allday: #60a5fa; /* blue-400 */
-  --dot-morning: #4ade80; /* green-400 */
+  --dot-morning: #34d399; /* emerald-400 */
   --dot-afternoon: #fbbf24; /* amber-400 */
 }
 
@@ -275,7 +278,7 @@
     }
 
     .weekly-grid::after {
-      content: '';
+      content: "";
       position: absolute;
       right: 0;
       top: 0;

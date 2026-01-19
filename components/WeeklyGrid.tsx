@@ -22,10 +22,9 @@ const SHIFTS: { type: ShiftType; label: string }[] = [
   { type: "15:30", label: "15:30~" },
 ];
 
-// Sub-row interface for grouping entries by "from" time
 interface SubRow {
-  fromTime: string | null; // null = main row (no "from" note)
-  label: string; // "15:30~" or "17:00~"
+  fromTime: string | null;
+  label: string;
   isSubRow: boolean;
 }
 
@@ -35,37 +34,26 @@ export default function WeeklyGrid({
   selectedEmployee,
   onEmployeeClick,
 }: WeeklyGridProps) {
-  // Generate array of 7 dates for the week
   const weekDates = generateWeekDates(schedule.weekStart);
 
-  // Format date string to MM/DD
   const formatDate = (dateStr: string): string => {
     const [, month, day] = dateStr.split("-");
     return `${month}/${day}`;
   };
 
-  // Format note string
   const formatNote = (note: TimeNote): string => {
     if (note.type === "until") return `~${note.time}`;
     if (note.type === "from") return `${note.time}~`;
     return note.time;
   };
 
-  // Check if a date matches today
-  const isToday = (date: string): boolean => {
-    return todayDate === date;
-  };
+  const isToday = (date: string): boolean => todayDate === date;
 
-  // Check if employee should be highlighted
-  const shouldHighlight = (employeeName: string): boolean => {
-    return selectedEmployee !== null && selectedEmployee === employeeName;
-  };
+  const shouldHighlight = (employeeName: string): boolean =>
+    selectedEmployee !== null && selectedEmployee === employeeName;
 
-  // Handle employee name click
   const handleEmployeeClick = (employeeName: string) => {
-    if (onEmployeeClick) {
-      onEmployeeClick(employeeName);
-    }
+    if (onEmployeeClick) onEmployeeClick(employeeName);
   };
 
   return (
@@ -74,43 +62,47 @@ export default function WeeklyGrid({
       role="region"
       aria-label="주간 스케줄 표"
     >
-      {/* Scrollable inner container with minimum width for mobile */}
       <div
-        className="min-w-[840px] sm:min-w-0 bg-gray-200 dark:bg-gray-700 rounded-xl overflow-hidden border border-gray-300 dark:border-gray-600"
+        // [DESIGN] 테두리와 배경을 Zinc 톤으로 변경하여 차분하고 고급스러운 느낌 (눈의 피로 감소)
+        className="min-w-[840px] sm:min-w-0 bg-zinc-100 dark:bg-zinc-900 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-sm"
         role="table"
         aria-label="주간 근무 스케줄"
       >
-        {/* Header row with days and dates */}
+        {/* Header Row */}
         <div
-          className="grid grid-cols-8 border-b border-gray-300 dark:border-gray-600"
+          className="grid grid-cols-8 border-b border-zinc-200 dark:border-zinc-800"
           role="row"
         >
-          {/* Empty corner cell */}
           <div
-            className="bg-gray-50 dark:bg-gray-800 p-3 border-r border-gray-200 dark:border-gray-700"
+            className="bg-zinc-50 dark:bg-zinc-900/50 p-3 border-r border-zinc-200 dark:border-zinc-800"
             role="columnheader"
-            aria-label="시프트 유형"
           />
           {weekDates.map((date, index) => (
             <div
               key={date}
               role="columnheader"
-              aria-label={`${DAYS[index]} ${formatDate(date)}${isToday(date) ? " (오늘)" : ""}`}
               className={cn(
-                "flex flex-col items-center p-3 text-center transition-colors",
-                "border-r border-gray-200 dark:border-gray-700 last:border-r-0",
+                "flex flex-col items-center p-3 text-center transition-colors border-r border-zinc-200 dark:border-zinc-800 last:border-r-0",
+                // [DESIGN] 오늘 날짜 헤더: 다크모드에서 너무 쨍하지 않게 Zinc-800 + 채도 낮은 Blue 사용
                 isToday(date)
-                  ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900"
-                  : "bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-blue-600 dark:text-blue-300 ring-inset ring-b-4 ring-blue-500/80"
+                  : "bg-zinc-50 dark:bg-zinc-900/50 text-zinc-500 dark:text-zinc-400"
               )}
             >
-              <span className="font-semibold text-sm">{DAYS[index]}</span>
               <span
                 className={cn(
-                  "text-xs",
+                  "font-semibold text-sm",
+                  isToday(date) && "text-blue-700 dark:text-blue-200"
+                )}
+              >
+                {DAYS[index]}
+              </span>
+              <span
+                className={cn(
+                  "text-xs mt-0.5",
                   isToday(date)
-                    ? "text-gray-300 dark:text-gray-600"
-                    : "text-gray-500 dark:text-gray-400"
+                    ? "text-blue-600/70 dark:text-blue-300/70"
+                    : "text-zinc-400 dark:text-zinc-500"
                 )}
               >
                 {formatDate(date)}
@@ -119,7 +111,7 @@ export default function WeeklyGrid({
           ))}
         </div>
 
-        {/* Rows for each shift type */}
+        {/* Rows */}
         {SHIFTS.map((shift, shiftIndex) => {
           const subRows = buildSubRows(
             schedule.entries,
@@ -136,34 +128,28 @@ export default function WeeklyGrid({
                 key={`${shift.type}-${subRow.fromTime ?? "main"}`}
                 className={cn(
                   "grid grid-cols-8",
-                  // Border between sub-rows
-                  subRow.isSubRow && "border-t border-gray-200 dark:border-gray-700",
-                  // Border between shifts (only after last sub-row of non-last shift)
+                  subRow.isSubRow &&
+                    "border-t border-dashed border-zinc-200 dark:border-zinc-800", // Sub-row 경계선은 점선으로 은은하게
                   isLastSubRow &&
                     !isLastShift &&
-                    "border-b border-gray-300 dark:border-gray-600"
+                    "border-b border-zinc-200 dark:border-zinc-800"
                 )}
                 role="row"
-                aria-label={
-                  subRow.isSubRow
-                    ? `${shift.label} 시프트, ${subRow.label}부터 시작`
-                    : `${shift.label} 시프트`
-                }
               >
-                {/* Shift/Sub-row label cell */}
+                {/* Row Label (11:00~ etc) */}
                 <div
                   className={cn(
-                    "flex items-center justify-center border-r border-gray-200 dark:border-gray-700",
+                    "flex items-center justify-center border-r border-zinc-200 dark:border-zinc-800",
                     subRow.isSubRow
-                      ? "bg-gray-100 dark:bg-gray-800 p-2 text-sm text-gray-500 dark:text-gray-400"
-                      : "bg-gray-50 dark:bg-gray-800 font-medium text-sm p-3 text-gray-700 dark:text-gray-300"
+                      ? "bg-zinc-50/50 dark:bg-zinc-900/30 p-2 text-xs text-zinc-400 dark:text-zinc-600 font-mono" // 배경색 차이를 거의 없애고 텍스트로만 구분
+                      : "bg-zinc-50 dark:bg-zinc-900/80 font-medium text-sm p-3 text-zinc-600 dark:text-zinc-300"
                   )}
                   role="rowheader"
                 >
                   {subRow.label}
                 </div>
 
-                {/* Day cells */}
+                {/* Cells */}
                 {weekDates.map((date, dayIndex) => {
                   const entries = getEntriesForSubRow(
                     schedule.entries,
@@ -171,72 +157,60 @@ export default function WeeklyGrid({
                     shift.type,
                     subRow.fromTime
                   );
-                  const cellLabel =
-                    entries.length > 0
-                      ? `${DAYS[dayIndex]} ${subRow.label}: ${entries.map((e) => e.name).join(", ")}`
-                      : `${DAYS[dayIndex]} ${subRow.label}: 근무자 없음`;
                   const today = isToday(date);
 
                   return (
                     <div
                       key={`${date}-${shift.type}-${subRow.fromTime ?? "main"}`}
                       role="cell"
-                      aria-label={cellLabel}
                       className={cn(
-                        "p-3 transition-colors",
-                        "border-r border-gray-200 dark:border-gray-700 last:border-r-0",
+                        "p-2 sm:p-3 transition-colors",
+                        "border-r border-zinc-200 dark:border-zinc-800 last:border-r-0",
                         subRow.isSubRow ? "min-h-[60px]" : "min-h-[80px]",
                         today
-                          ? subRow.isSubRow
-                            ? "bg-gray-700 dark:bg-gray-300"
-                            : "bg-gray-800 dark:bg-gray-200"
-                          : subRow.isSubRow
-                            ? "bg-gray-50 dark:bg-gray-850"
-                            : "bg-white dark:bg-gray-900"
+                          ? "bg-blue-50/40 dark:bg-blue-900/10" // 파란빛을 아주 연하게 (투명도 조절)
+                          : "bg-white dark:bg-zinc-950" // 서브행과 메인행 배경 통일
                       )}
                     >
-                      <div className="flex flex-col gap-1.5">
+                      <div className="flex flex-col gap-2">
                         {entries.map((entry, idx) => {
                           const highlighted = shouldHighlight(entry.name);
-                          // Show note only for "until" type (from is shown in row label)
-                          const showNote = entry.note?.type === "until";
+                          const showNote =
+                            entry.note?.type === "until" ||
+                            entry.note?.type === "from";
 
                           return (
                             <button
                               key={`${entry.name}-${idx}`}
                               onClick={() => handleEmployeeClick(entry.name)}
                               className={cn(
-                                "employee-badge flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap",
-                                "hover:shadow-md active:scale-95",
+                                "group flex items-center justify-between w-full px-2.5 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all cursor-pointer border",
+                                "hover:shadow-sm active:scale-[0.98]",
+                                // [DESIGN] Badge 컬러 완전한 Zinc 모노톤으로 변경 (파란끼 제거)
                                 highlighted
-                                  ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 shadow-md scale-105"
+                                  ? "bg-zinc-800 border-zinc-800 text-white shadow-md shadow-zinc-500/20 dark:bg-zinc-100 dark:border-zinc-100 dark:text-zinc-900" // 선택됨: 진한 회색/검정
                                   : today
-                                    ? "bg-gray-600 dark:bg-gray-400 text-white dark:text-gray-900 hover:bg-gray-500 dark:hover:bg-gray-500"
-                                    : "bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    ? "bg-white dark:bg-zinc-800 border-zinc-300 dark:border-zinc-600 text-zinc-900 dark:text-zinc-100 hover:border-zinc-400 dark:hover:border-zinc-500" // 오늘
+                                    : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-300"
                               )}
-                              aria-label={`${entry.name} 클릭하여 상세 스케줄 보기`}
-                              aria-pressed={highlighted}
                             >
-                              <span>{entry.name}</span>
+                              <span className="truncate">{entry.name}</span>
+                              {/* Dot Indicator & Note */}
                               {showNote && entry.note && (
-                                <span className="flex items-center gap-1.5">
+                                <div className="flex items-center gap-1.5 ml-2 shrink-0">
+                                  {/* [DESIGN] 예외 시간(until)은 Amber(주황) 계열로 경고 느낌 */}
+                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400 shadow-[0_0_4px_rgba(245,158,11,0.4)]" />
                                   <span
                                     className={cn(
-                                      "dot-indicator",
-                                      "dot-afternoon"
-                                    )}
-                                  />
-                                  <span
-                                    className={cn(
-                                      "text-xs font-mono",
-                                      highlighted || today
-                                        ? "text-gray-300 dark:text-gray-600"
-                                        : "text-gray-500 dark:text-gray-400"
+                                      "text-[10px] font-mono leading-none",
+                                      highlighted
+                                        ? "text-zinc-300 dark:text-zinc-600"
+                                        : "text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-600 dark:group-hover:text-zinc-300"
                                     )}
                                   >
                                     {formatNote(entry.note)}
                                   </span>
-                                </span>
+                                </div>
                               )}
                             </button>
                           );
@@ -254,10 +228,8 @@ export default function WeeklyGrid({
   );
 }
 
-// Helper: Generate 7 dates starting from weekStart
 function generateWeekDates(weekStart: string): string[] {
   let startDate: Date;
-
   if (!weekStart || weekStart.trim() === "") {
     const today = new Date();
     startDate = new Date(today);
@@ -270,54 +242,43 @@ function generateWeekDates(weekStart: string): string[] {
       startDate.setDate(today.getDate() - today.getDay());
     }
   }
-
   const dates: string[] = [];
-
   for (let i = 0; i < 7; i++) {
     const date = new Date(startDate);
     date.setDate(startDate.getDate() + i);
     dates.push(date.toISOString().split("T")[0]);
   }
-
   return dates;
 }
 
-// Helper: Get unique "from" times for a shift across all entries
 function getFromTimesForShift(
   entries: ScheduleEntry[],
   shiftType: ShiftType
 ): string[] {
   const fromTimes = new Set<string>();
-
   entries.forEach((entry) => {
     if (entry.shift === shiftType && entry.note?.type === "from") {
       fromTimes.add(entry.note.time);
     }
   });
-
   return Array.from(fromTimes).sort();
 }
 
-// Helper: Build sub-rows for a shift (main row + from time sub-rows)
 function buildSubRows(
   entries: ScheduleEntry[],
   shiftType: ShiftType,
   shiftLabel: string
 ): SubRow[] {
   const fromTimes = getFromTimesForShift(entries, shiftType);
-
   const subRows: SubRow[] = [
     { fromTime: null, label: shiftLabel, isSubRow: false },
   ];
-
   fromTimes.forEach((time) => {
     subRows.push({ fromTime: time, label: `${time}~`, isSubRow: true });
   });
-
   return subRows;
 }
 
-// Helper: Get entries for a specific sub-row
 function getEntriesForSubRow(
   entries: ScheduleEntry[],
   date: string,
@@ -326,12 +287,9 @@ function getEntriesForSubRow(
 ): ScheduleEntry[] {
   return entries.filter((entry) => {
     if (entry.date !== date || entry.shift !== shiftType) return false;
-
     if (fromTime === null) {
-      // Main row: entries without "from" note
       return entry.note?.type !== "from";
     } else {
-      // Sub-row: entries with matching "from" time
       return entry.note?.type === "from" && entry.note.time === fromTime;
     }
   });

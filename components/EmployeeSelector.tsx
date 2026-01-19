@@ -37,27 +37,27 @@ export default function EmployeeSelector({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full sm:w-auto min-w-[220px] flex items-center justify-between gap-3 px-5 py-3.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-gray-300 dark:hover:border-gray-600 transition-all shadow-sm hover:shadow"
+        className="w-full sm:w-auto min-w-[220px] flex items-center justify-between gap-3 px-5 py-3.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl hover:border-zinc-300 dark:hover:border-zinc-700 transition-all shadow-sm hover:shadow"
         aria-label="직원 선택"
         aria-expanded={isOpen}
       >
         <div className="flex items-center gap-3">
-          <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg">
-            <User className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+          <div className="p-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
+            <User className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
           </div>
-          <span className="font-medium text-gray-900 dark:text-gray-100">
+          <span className="font-medium text-zinc-900 dark:text-zinc-100">
             {displayText}
           </span>
         </div>
         <ChevronDown
-          className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform ${
+          className={`w-4 h-4 text-zinc-500 dark:text-zinc-400 transition-transform ${
             isOpen ? "rotate-180" : ""
           }`}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl max-h-[320px] overflow-y-auto z-10">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xl max-h-[320px] overflow-y-auto z-50">
           <div className="p-1">
             <button
               onClick={() => {
@@ -66,14 +66,14 @@ export default function EmployeeSelector({
               }}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all ${
                 selectedEmployee === null
-                  ? "bg-gray-900 dark:bg-gray-700 text-white"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
+                  : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"
               }`}
             >
               <span className="font-medium">전체 직원</span>
               {selectedEmployee === null && <Check className="w-4 h-4" />}
             </button>
-            <div className="my-2 h-px bg-gray-200 dark:bg-gray-700" />
+            <div className="my-2 h-px bg-zinc-100 dark:bg-zinc-800" />
             {employees.map((employee) => (
               <button
                 key={employee}
@@ -83,8 +83,8 @@ export default function EmployeeSelector({
                 }}
                 className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all ${
                   selectedEmployee === employee
-                    ? "bg-gray-900 dark:bg-gray-700 text-white"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                    ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
+                    : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"
                 }`}
               >
                 <span className="font-medium">{employee}</span>
