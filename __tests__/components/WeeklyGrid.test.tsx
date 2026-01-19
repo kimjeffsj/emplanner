@@ -95,10 +95,36 @@ describe("WeeklyGrid", () => {
       expect(screen.getByText("Minji")).toBeInTheDocument();
     });
 
-    it("note가 있는 직원은 note를 함께 표시한다", () => {
+    it("from note가 있는 직원은 서브행에 표시된다", () => {
       render(<WeeklyGrid schedule={mockWeekSchedule} />);
-      // Note format: (type + time) e.g., (from17:30)
-      expect(screen.getByText(/\(from17:30\)/)).toBeInTheDocument();
+      // from note는 서브행 라벨로 표시됨 (예: "17:30~")
+      expect(screen.getByText("17:30~")).toBeInTheDocument();
+      // 직원 이름은 여전히 표시됨
+      expect(screen.getByText("Minji")).toBeInTheDocument();
+    });
+
+    it("until note가 있는 직원은 인라인으로 시간 표시", () => {
+      const entriesWithUntil: ScheduleEntry[] = [
+        {
+          name: "Jason",
+          date: "2024-01-15",
+          dayOfWeek: "Monday",
+          shift: "11:00",
+          location: "No.3",
+          note: { type: "until", time: "15:30" },
+        },
+      ];
+
+      const scheduleWithUntil: WeekSchedule = {
+        weekStart: "2024-01-14",
+        weekEnd: "2024-01-20",
+        location: "No.3",
+        entries: entriesWithUntil,
+      };
+
+      render(<WeeklyGrid schedule={scheduleWithUntil} />);
+      // until note는 인라인으로 표시됨 (예: "~15:30")
+      expect(screen.getByText("~15:30")).toBeInTheDocument();
     });
   });
 

@@ -22,6 +22,13 @@ const SHIFTS: { type: ShiftType; label: string }[] = [
   { type: "15:30", label: "15:30~" },
 ];
 
+// Sub-row interface for grouping entries by "from" time
+interface SubRow {
+  fromTime: string | null; // null = main row (no "from" note)
+  label: string; // "15:30~" or "17:00~"
+  isSubRow: boolean;
+}
+
 export default function WeeklyGrid({
   schedule,
   todayDate,
@@ -30,9 +37,6 @@ export default function WeeklyGrid({
 }: WeeklyGridProps) {
   // Generate array of 7 dates for the week
   const weekDates = generateWeekDates(schedule.weekStart);
-
-  // Group entries by date and shift
-  const entriesByDateAndShift = groupEntries(schedule.entries);
 
   // Format date string to MM/DD
   const formatDate = (dateStr: string): string => {
@@ -57,12 +61,6 @@ export default function WeeklyGrid({
     return selectedEmployee !== null && selectedEmployee === employeeName;
   };
 
-  // Get entries for specific date and shift
-  const getEntries = (date: string, shift: ShiftType): ScheduleEntry[] => {
-    const key = `${date}-${shift}`;
-    return entriesByDateAndShift[key] || [];
-  };
-
   // Handle employee name click
   const handleEmployeeClick = (employeeName: string) => {
     if (onEmployeeClick) {
@@ -84,7 +82,7 @@ export default function WeeklyGrid({
       >
         {/* Header row with days and dates */}
         <div
-          className="grid grid-cols-8 gap-px border-b border-gray-300 dark:border-gray-600"
+          className="grid grid-cols-8 border-b border-gray-300 dark:border-gray-600"
           role="row"
         >
           {/* Empty corner cell */}
@@ -122,87 +120,130 @@ export default function WeeklyGrid({
         </div>
 
         {/* Rows for each shift type */}
-        {SHIFTS.map((shift, shiftIndex) => (
-          <div
-            key={shift.type}
-            className={cn(
-              "grid grid-cols-8 gap-px",
-              shiftIndex < SHIFTS.length - 1 &&
-                "border-b border-gray-300 dark:border-gray-600"
-            )}
-            role="row"
-          >
-            {/* Shift label cell */}
-            <div
-              className="bg-gray-50 dark:bg-gray-800 flex items-center justify-center font-medium text-sm p-3 text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700"
-              role="rowheader"
-            >
-              {shift.label}
-            </div>
+        {SHIFTS.map((shift, shiftIndex) => {
+          const subRows = buildSubRows(
+            schedule.entries,
+            shift.type,
+            shift.label
+          );
 
-            {/* Day cells */}
-            {weekDates.map((date, index) => {
-              const entries = getEntries(date, shift.type);
-              const cellLabel =
-                entries.length > 0
-                  ? `${DAYS[index]} ${shift.label}: ${entries.map((e) => e.name).join(", ")}`
-                  : `${DAYS[index]} ${shift.label}: 근무자 없음`;
-              const today = isToday(date);
+          return subRows.map((subRow, subRowIndex) => {
+            const isLastSubRow = subRowIndex === subRows.length - 1;
+            const isLastShift = shiftIndex === SHIFTS.length - 1;
 
-              return (
+            return (
+              <div
+                key={`${shift.type}-${subRow.fromTime ?? "main"}`}
+                className={cn(
+                  "grid grid-cols-8",
+                  // Border between shifts (only after last sub-row of non-last shift)
+                  isLastSubRow &&
+                    !isLastShift &&
+                    "border-b border-gray-300 dark:border-gray-600"
+                )}
+                role="row"
+                aria-label={
+                  subRow.isSubRow
+                    ? `${shift.label} 시프트, ${subRow.label}부터 시작`
+                    : `${shift.label} 시프트`
+                }
+              >
+                {/* Shift/Sub-row label cell */}
                 <div
-                  key={`${date}-${shift.type}`}
-                  role="cell"
-                  aria-label={cellLabel}
                   className={cn(
-                    "min-h-[80px] p-3 transition-colors",
-                    "border-r border-gray-200 dark:border-gray-700 last:border-r-0",
-                    today
-                      ? "bg-gray-800 dark:bg-gray-200"
-                      : "bg-white dark:bg-gray-900"
+                    "flex items-center border-r border-gray-200 dark:border-gray-700",
+                    subRow.isSubRow
+                      ? "bg-gray-100 dark:bg-gray-750 pl-5 pr-3 py-2 text-xs text-gray-500 dark:text-gray-400"
+                      : "bg-gray-50 dark:bg-gray-800 justify-center font-medium text-sm p-3 text-gray-700 dark:text-gray-300"
                   )}
+                  role="rowheader"
                 >
-                  <div className="flex flex-col gap-1.5">
-                    {entries.map((entry, idx) => {
-                      const highlighted = shouldHighlight(entry.name);
-                      return (
-                        <button
-                          key={`${entry.name}-${idx}`}
-                          onClick={() => handleEmployeeClick(entry.name)}
-                          className={cn(
-                            "employee-badge px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap",
-                            "hover:shadow-md active:scale-95",
-                            highlighted
-                              ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 shadow-md scale-105"
-                              : today
-                                ? "bg-gray-700 dark:bg-gray-300 text-white dark:text-gray-900 hover:bg-gray-600 dark:hover:bg-gray-400"
-                                : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600"
-                          )}
-                          aria-label={`${entry.name} 클릭하여 상세 스케줄 보기`}
-                          aria-pressed={highlighted}
-                        >
-                          {entry.name}
-                          {entry.note && (
-                            <span
-                              className={cn(
-                                "ml-1 text-xs",
-                                highlighted || today
-                                  ? "text-gray-300 dark:text-gray-600"
-                                  : "text-gray-500 dark:text-gray-400"
-                              )}
-                            >
-                              {formatNote(entry.note)}
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {subRow.isSubRow && (
+                    <span className="text-gray-400 dark:text-gray-500 mr-1">
+                      └
+                    </span>
+                  )}
+                  {subRow.label}
                 </div>
-              );
-            })}
-          </div>
-        ))}
+
+                {/* Day cells */}
+                {weekDates.map((date, dayIndex) => {
+                  const entries = getEntriesForSubRow(
+                    schedule.entries,
+                    date,
+                    shift.type,
+                    subRow.fromTime
+                  );
+                  const cellLabel =
+                    entries.length > 0
+                      ? `${DAYS[dayIndex]} ${subRow.label}: ${entries.map((e) => e.name).join(", ")}`
+                      : `${DAYS[dayIndex]} ${subRow.label}: 근무자 없음`;
+                  const today = isToday(date);
+
+                  return (
+                    <div
+                      key={`${date}-${shift.type}-${subRow.fromTime ?? "main"}`}
+                      role="cell"
+                      aria-label={cellLabel}
+                      className={cn(
+                        "p-3 transition-colors",
+                        "border-r border-gray-200 dark:border-gray-700 last:border-r-0",
+                        subRow.isSubRow ? "min-h-[60px]" : "min-h-[80px]",
+                        today
+                          ? subRow.isSubRow
+                            ? "bg-gray-700 dark:bg-gray-300"
+                            : "bg-gray-800 dark:bg-gray-200"
+                          : subRow.isSubRow
+                            ? "bg-gray-50 dark:bg-gray-850"
+                            : "bg-white dark:bg-gray-900"
+                      )}
+                    >
+                      <div className="flex flex-col gap-1.5">
+                        {entries.map((entry, idx) => {
+                          const highlighted = shouldHighlight(entry.name);
+                          // Show note only for "until" type (from is shown in row label)
+                          const showNote = entry.note?.type === "until";
+
+                          return (
+                            <button
+                              key={`${entry.name}-${idx}`}
+                              onClick={() => handleEmployeeClick(entry.name)}
+                              className={cn(
+                                "employee-badge px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap",
+                                "hover:shadow-md active:scale-95",
+                                highlighted
+                                  ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 shadow-md scale-105"
+                                  : today
+                                    ? "bg-gray-700 dark:bg-gray-300 text-white dark:text-gray-900 hover:bg-gray-600 dark:hover:bg-gray-400"
+                                    : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600"
+                              )}
+                              aria-label={`${entry.name} 클릭하여 상세 스케줄 보기`}
+                              aria-pressed={highlighted}
+                            >
+                              {entry.name}
+                              {showNote && entry.note && (
+                                <span
+                                  className={cn(
+                                    "ml-1 text-xs",
+                                    highlighted || today
+                                      ? "text-gray-300 dark:text-gray-600"
+                                      : "text-gray-500 dark:text-gray-400"
+                                  )}
+                                >
+                                  {formatNote(entry.note)}
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          });
+        })}
       </div>
     </div>
   );
@@ -236,19 +277,57 @@ function generateWeekDates(weekStart: string): string[] {
   return dates;
 }
 
-// Helper: Group entries by date-shift key
-function groupEntries(
-  entries: ScheduleEntry[]
-): Record<string, ScheduleEntry[]> {
-  const grouped: Record<string, ScheduleEntry[]> = {};
+// Helper: Get unique "from" times for a shift across all entries
+function getFromTimesForShift(
+  entries: ScheduleEntry[],
+  shiftType: ShiftType
+): string[] {
+  const fromTimes = new Set<string>();
 
   entries.forEach((entry) => {
-    const key = `${entry.date}-${entry.shift}`;
-    if (!grouped[key]) {
-      grouped[key] = [];
+    if (entry.shift === shiftType && entry.note?.type === "from") {
+      fromTimes.add(entry.note.time);
     }
-    grouped[key].push(entry);
   });
 
-  return grouped;
+  return Array.from(fromTimes).sort();
+}
+
+// Helper: Build sub-rows for a shift (main row + from time sub-rows)
+function buildSubRows(
+  entries: ScheduleEntry[],
+  shiftType: ShiftType,
+  shiftLabel: string
+): SubRow[] {
+  const fromTimes = getFromTimesForShift(entries, shiftType);
+
+  const subRows: SubRow[] = [
+    { fromTime: null, label: shiftLabel, isSubRow: false },
+  ];
+
+  fromTimes.forEach((time) => {
+    subRows.push({ fromTime: time, label: `${time}~`, isSubRow: true });
+  });
+
+  return subRows;
+}
+
+// Helper: Get entries for a specific sub-row
+function getEntriesForSubRow(
+  entries: ScheduleEntry[],
+  date: string,
+  shiftType: ShiftType,
+  fromTime: string | null
+): ScheduleEntry[] {
+  return entries.filter((entry) => {
+    if (entry.date !== date || entry.shift !== shiftType) return false;
+
+    if (fromTime === null) {
+      // Main row: entries without "from" note
+      return entry.note?.type !== "from";
+    } else {
+      // Sub-row: entries with matching "from" time
+      return entry.note?.type === "from" && entry.note.time === fromTime;
+    }
+  });
 }
