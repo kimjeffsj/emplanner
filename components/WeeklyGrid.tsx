@@ -58,171 +58,174 @@ export default function WeeklyGrid({
 
   return (
     <div
-      className="weekly-grid w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0"
+      className="mobile-scroll-container w-full -mx-4 sm:mx-0"
       role="region"
       aria-label="주간 스케줄 표"
     >
-      <div
-        // [DESIGN] 테두리와 배경을 Zinc 톤으로 변경하여 차분하고 고급스러운 느낌 (눈의 피로 감소)
-        className="min-w-[840px] sm:min-w-0 bg-zinc-100 dark:bg-zinc-900 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-sm"
-        role="table"
-        aria-label="주간 근무 스케줄"
-      >
-        {/* Header Row */}
+      <div className="mobile-scroll-content w-full overflow-x-auto px-4 sm:px-0">
         <div
-          className="grid grid-cols-8 border-b border-zinc-200 dark:border-zinc-800"
-          role="row"
+          // [DESIGN] 테두리와 배경을 Zinc 톤으로 변경하여 차분하고 고급스러운 느낌 (눈의 피로 감소)
+          className="min-w-[840px] sm:min-w-0 bg-zinc-100 dark:bg-zinc-900 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-sm"
+          role="table"
+          aria-label="주간 근무 스케줄"
         >
+          {/* Header Row */}
           <div
-            className="bg-zinc-50 dark:bg-zinc-900/50 p-3 border-r border-zinc-200 dark:border-zinc-800"
-            role="columnheader"
-          />
-          {weekDates.map((date, index) => (
+            className="grid grid-cols-8 border-b border-zinc-200 dark:border-zinc-800"
+            role="row"
+          >
             <div
-              key={date}
+              className="bg-zinc-50 dark:bg-zinc-900/50 p-3 border-r border-zinc-200 dark:border-zinc-800"
               role="columnheader"
-              className={cn(
-                "flex flex-col items-center p-3 text-center transition-colors border-r border-zinc-200 dark:border-zinc-800 last:border-r-0",
-                // [DESIGN] 오늘 날짜 헤더: 다크모드에서 너무 쨍하지 않게 Zinc-800 + 채도 낮은 Blue 사용
-                isToday(date)
-                  ? "bg-zinc-100 dark:bg-zinc-800 text-blue-600 dark:text-blue-300 ring-inset ring-b-4 ring-blue-500/80"
-                  : "bg-zinc-50 dark:bg-zinc-900/50 text-zinc-500 dark:text-zinc-400"
-              )}
-            >
-              <span
-                className={cn(
-                  "font-semibold text-sm",
-                  isToday(date) && "text-blue-700 dark:text-blue-200"
-                )}
-              >
-                {DAYS[index]}
-              </span>
-              <span
-                className={cn(
-                  "text-xs mt-0.5",
-                  isToday(date)
-                    ? "text-blue-600/70 dark:text-blue-300/70"
-                    : "text-zinc-400 dark:text-zinc-500"
-                )}
-              >
-                {formatDate(date)}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* Rows */}
-        {SHIFTS.map((shift, shiftIndex) => {
-          const subRows = buildSubRows(
-            schedule.entries,
-            shift.type,
-            shift.label
-          );
-
-          return subRows.map((subRow, subRowIndex) => {
-            const isLastSubRow = subRowIndex === subRows.length - 1;
-            const isLastShift = shiftIndex === SHIFTS.length - 1;
-
-            return (
+            />
+            {weekDates.map((date, index) => (
               <div
-                key={`${shift.type}-${subRow.fromTime ?? "main"}`}
+                key={date}
+                role="columnheader"
                 className={cn(
-                  "grid grid-cols-8",
-                  subRow.isSubRow &&
-                    "border-t border-dashed border-zinc-200 dark:border-zinc-800", // Sub-row 경계선은 점선으로 은은하게
-                  isLastSubRow &&
-                    !isLastShift &&
-                    "border-b border-zinc-200 dark:border-zinc-800"
+                  "flex flex-col items-center p-3 text-center transition-colors border-r border-zinc-200 dark:border-zinc-800 last:border-r-0",
+                  // [DESIGN] 오늘 날짜 헤더: 다크모드에서 너무 쨍하지 않게 Zinc-800 + 채도 낮은 Blue 사용
+                  isToday(date)
+                    ? "bg-zinc-100 dark:bg-zinc-800 text-blue-600 dark:text-blue-300 ring-inset ring-b-4 ring-blue-500/80"
+                    : "bg-zinc-50 dark:bg-zinc-900/50 text-zinc-500 dark:text-zinc-400"
                 )}
-                role="row"
               >
-                {/* Row Label (11:00~ etc) */}
-                <div
+                <span
                   className={cn(
-                    "flex items-center justify-center border-r border-zinc-200 dark:border-zinc-800",
-                    subRow.isSubRow
-                      ? "bg-zinc-50/50 dark:bg-zinc-900/30 p-2 text-xs text-zinc-400 dark:text-zinc-600 font-mono" // 배경색 차이를 거의 없애고 텍스트로만 구분
-                      : "bg-zinc-50 dark:bg-zinc-900/80 font-medium text-sm p-3 text-zinc-600 dark:text-zinc-300"
+                    "font-semibold text-sm",
+                    isToday(date) && "text-blue-700 dark:text-blue-200"
                   )}
-                  role="rowheader"
                 >
-                  {subRow.label}
-                </div>
-
-                {/* Cells */}
-                {weekDates.map((date, dayIndex) => {
-                  const entries = getEntriesForSubRow(
-                    schedule.entries,
-                    date,
-                    shift.type,
-                    subRow.fromTime
-                  );
-                  const today = isToday(date);
-
-                  return (
-                    <div
-                      key={`${date}-${shift.type}-${subRow.fromTime ?? "main"}`}
-                      role="cell"
-                      className={cn(
-                        "p-2 sm:p-3 transition-colors",
-                        "border-r border-zinc-200 dark:border-zinc-800 last:border-r-0",
-                        subRow.isSubRow ? "min-h-[60px]" : "min-h-[80px]",
-                        today
-                          ? "bg-blue-50/40 dark:bg-blue-900/10" // 파란빛을 아주 연하게 (투명도 조절)
-                          : "bg-white dark:bg-zinc-950" // 서브행과 메인행 배경 통일
-                      )}
-                    >
-                      <div className="flex flex-col gap-2">
-                        {entries.map((entry, idx) => {
-                          const highlighted = shouldHighlight(entry.name);
-                          const showNote =
-                            entry.note?.type === "until" ||
-                            entry.note?.type === "from";
-
-                          return (
-                            <button
-                              key={`${entry.name}-${idx}`}
-                              onClick={() => handleEmployeeClick(entry.name)}
-                              className={cn(
-                                "group flex items-center justify-between w-full px-2.5 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all cursor-pointer border",
-                                "hover:shadow-sm active:scale-[0.98]",
-                                // [DESIGN] Badge 컬러 완전한 Zinc 모노톤으로 변경 (파란끼 제거)
-                                highlighted
-                                  ? "bg-zinc-800 border-zinc-800 text-white shadow-md shadow-zinc-500/20 dark:bg-zinc-100 dark:border-zinc-100 dark:text-zinc-900" // 선택됨: 진한 회색/검정
-                                  : today
-                                    ? "bg-white dark:bg-zinc-800 border-zinc-300 dark:border-zinc-600 text-zinc-900 dark:text-zinc-100 hover:border-zinc-400 dark:hover:border-zinc-500" // 오늘
-                                    : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-300"
-                              )}
-                            >
-                              <span className="truncate">{entry.name}</span>
-                              {/* Dot Indicator & Note */}
-                              {showNote && entry.note && (
-                                <div className="flex items-center gap-1.5 ml-2 shrink-0">
-                                  {/* [DESIGN] 예외 시간(until)은 Amber(주황) 계열로 경고 느낌 */}
-                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400 shadow-[0_0_4px_rgba(245,158,11,0.4)]" />
-                                  <span
-                                    className={cn(
-                                      "text-[10px] font-mono leading-none",
-                                      highlighted
-                                        ? "text-zinc-300 dark:text-zinc-600"
-                                        : "text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-600 dark:group-hover:text-zinc-300"
-                                    )}
-                                  >
-                                    {formatNote(entry.note)}
-                                  </span>
-                                </div>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
+                  {DAYS[index]}
+                </span>
+                <span
+                  className={cn(
+                    "text-xs mt-0.5",
+                    isToday(date)
+                      ? "text-blue-600/70 dark:text-blue-300/70"
+                      : "text-zinc-400 dark:text-zinc-500"
+                  )}
+                >
+                  {formatDate(date)}
+                </span>
               </div>
+            ))}
+          </div>
+
+          {/* Rows */}
+          {SHIFTS.map((shift, shiftIndex) => {
+            const subRows = buildSubRows(
+              schedule.entries,
+              shift.type,
+              shift.label
             );
-          });
-        })}
+
+            return subRows.map((subRow, subRowIndex) => {
+              const isLastSubRow = subRowIndex === subRows.length - 1;
+              const isLastShift = shiftIndex === SHIFTS.length - 1;
+
+              return (
+                <div
+                  key={`${shift.type}-${subRow.fromTime ?? "main"}`}
+                  className={cn(
+                    "grid grid-cols-8",
+                    subRow.isSubRow &&
+                      "border-t border-dashed border-zinc-200 dark:border-zinc-800", // Sub-row 경계선은 점선으로 은은하게
+                    isLastSubRow &&
+                      !isLastShift &&
+                      "border-b border-zinc-200 dark:border-zinc-800"
+                  )}
+                  role="row"
+                >
+                  {/* Row Label (11:00~ etc) */}
+                  <div
+                    className={cn(
+                      "flex items-center justify-center border-r border-zinc-200 dark:border-zinc-800",
+                      subRow.isSubRow
+                        ? "bg-zinc-50/50 dark:bg-zinc-900/30 p-2 text-xs text-zinc-400 dark:text-zinc-600 font-mono" // 배경색 차이를 거의 없애고 텍스트로만 구분
+                        : "bg-zinc-50 dark:bg-zinc-900/80 font-medium text-sm p-3 text-zinc-600 dark:text-zinc-300"
+                    )}
+                    role="rowheader"
+                  >
+                    {subRow.label}
+                  </div>
+
+                  {/* Cells */}
+                  {weekDates.map((date, dayIndex) => {
+                    const entries = getEntriesForSubRow(
+                      schedule.entries,
+                      date,
+                      shift.type,
+                      subRow.fromTime
+                    );
+                    const today = isToday(date);
+
+                    return (
+                      <div
+                        key={`${date}-${shift.type}-${subRow.fromTime ?? "main"}`}
+                        role="cell"
+                        className={cn(
+                          "p-2 sm:p-3 transition-colors",
+                          "border-r border-zinc-200 dark:border-zinc-800 last:border-r-0",
+                          subRow.isSubRow ? "min-h-[60px]" : "min-h-[80px]",
+                          today
+                            ? "bg-blue-50/40 dark:bg-blue-900/10" // 파란빛을 아주 연하게 (투명도 조절)
+                            : "bg-white dark:bg-zinc-950" // 서브행과 메인행 배경 통일
+                        )}
+                      >
+                        <div className="flex flex-col gap-2">
+                          {entries.map((entry, idx) => {
+                            const highlighted = shouldHighlight(entry.name);
+                            const showNote =
+                              entry.note?.type === "until" ||
+                              entry.note?.type === "from";
+
+                            return (
+                              <button
+                                key={`${entry.name}-${idx}`}
+                                onClick={() => handleEmployeeClick(entry.name)}
+                                className={cn(
+                                  "group flex items-center justify-between w-full px-2.5 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all cursor-pointer border",
+                                  "hover:shadow-sm active:scale-[0.98]",
+                                  // [DESIGN] Badge 컬러 완전한 Zinc 모노톤으로 변경 (파란끼 제거)
+                                  highlighted
+                                    ? "bg-zinc-800 border-zinc-800 text-white shadow-md shadow-zinc-500/20 dark:bg-zinc-100 dark:border-zinc-100 dark:text-zinc-900" // 선택됨: 진한 회색/검정
+                                    : today
+                                      ? "bg-white dark:bg-zinc-800 border-zinc-300 dark:border-zinc-600 text-zinc-900 dark:text-zinc-100 hover:border-zinc-400 dark:hover:border-zinc-500" // 오늘
+                                      : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-300"
+                                )}
+                              >
+                                <span className="truncate">{entry.name}</span>
+                                {/* Dot Indicator (Time Note exists) */}
+                                {showNote && entry.note && (
+                                  <div className="flex items-center gap-1.5 ml-2 shrink-0">
+                                    {/* [DESIGN] 예외 시간(until)은 Amber(주황) 계열로 경고 느낌 */}
+                                    <span className="w-1.5 h-1.5 rounded-full ring-1 ring-inset ring-black/5 dark:ring-white/10 bg-amber-500 dark:bg-amber-400 shadow-[0_0_4px_rgba(245,158,11,0.4)]" />
+                                    {/* 모바일에서는 숨기고 PC(sm 이상)에서만 시간 표시 */}
+                                    <span
+                                      className={cn(
+                                        "hidden sm:inline-block text-[10px] font-mono leading-none",
+                                        highlighted
+                                          ? "text-zinc-300 dark:text-zinc-600"
+                                          : "text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-600 dark:group-hover:text-zinc-300"
+                                      )}
+                                    >
+                                      {formatNote(entry.note)}
+                                    </span>
+                                  </div>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            });
+          })}
+        </div>
       </div>
     </div>
   );

@@ -251,33 +251,35 @@
 
 /* Mobile-first responsive styles */
 @layer components {
-  /* 모바일 가로 스크롤 힌트 */
-  .weekly-grid {
+  /* 모바일 가로 스크롤 컨테이너 (Wrapper) - 그라데이션 힌트용 */
+  .mobile-scroll-container {
+    position: relative;
+    /* Wrapper는 스크롤되지 않으므로 overflow 설정을 하지 않음 */
+  }
+
+  /* 모바일 가로 스크롤 내용 (Content) - 실제 스크롤 발생 */
+  .mobile-scroll-content {
     /* 스크롤바 스타일링 */
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
   }
 
-  .weekly-grid::-webkit-scrollbar {
+  .mobile-scroll-content::-webkit-scrollbar {
     height: 6px;
   }
 
-  .weekly-grid::-webkit-scrollbar-track {
+  .mobile-scroll-content::-webkit-scrollbar-track {
     background: transparent;
   }
 
-  .weekly-grid::-webkit-scrollbar-thumb {
+  .mobile-scroll-content::-webkit-scrollbar-thumb {
     background-color: var(--border);
     border-radius: 3px;
   }
 
-  /* 모바일에서 스크롤 가능 표시 (그라데이션) */
+  /* 모바일에서 스크롤 가능 표시 (그라데이션) - Wrapper에 적용하여 고정 */
   @media (max-width: 640px) {
-    .weekly-grid {
-      position: relative;
-    }
-
-    .weekly-grid::after {
+    .mobile-scroll-container::after {
       content: "";
       position: absolute;
       right: 0;
@@ -286,6 +288,7 @@
       width: 24px;
       background: linear-gradient(to right, transparent, var(--background));
       pointer-events: none;
+      z-index: 10;
     }
   }
 
