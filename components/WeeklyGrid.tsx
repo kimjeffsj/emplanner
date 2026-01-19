@@ -76,7 +76,7 @@ export default function WeeklyGrid({
     >
       {/* Scrollable inner container with minimum width for mobile */}
       <div
-        className="min-w-[840px] sm:min-w-0 bg-gray-200 dark:bg-gray-700 rounded-xl overflow-hidden"
+        className="min-w-[840px] sm:min-w-0 bg-gray-200 dark:bg-gray-700 rounded-xl overflow-hidden border border-gray-300 dark:border-gray-600"
         role="table"
         aria-label="주간 근무 스케줄"
       >
@@ -136,6 +136,8 @@ export default function WeeklyGrid({
                 key={`${shift.type}-${subRow.fromTime ?? "main"}`}
                 className={cn(
                   "grid grid-cols-8",
+                  // Border between sub-rows
+                  subRow.isSubRow && "border-t border-gray-200 dark:border-gray-700",
                   // Border between shifts (only after last sub-row of non-last shift)
                   isLastSubRow &&
                     !isLastShift &&
@@ -151,18 +153,13 @@ export default function WeeklyGrid({
                 {/* Shift/Sub-row label cell */}
                 <div
                   className={cn(
-                    "flex items-center border-r border-gray-200 dark:border-gray-700",
+                    "flex items-center justify-center border-r border-gray-200 dark:border-gray-700",
                     subRow.isSubRow
-                      ? "bg-gray-100 dark:bg-gray-750 pl-5 pr-3 py-2 text-xs text-gray-500 dark:text-gray-400"
-                      : "bg-gray-50 dark:bg-gray-800 justify-center font-medium text-sm p-3 text-gray-700 dark:text-gray-300"
+                      ? "bg-gray-100 dark:bg-gray-800 p-2 text-sm text-gray-500 dark:text-gray-400"
+                      : "bg-gray-50 dark:bg-gray-800 font-medium text-sm p-3 text-gray-700 dark:text-gray-300"
                   )}
                   role="rowheader"
                 >
-                  {subRow.isSubRow && (
-                    <span className="text-gray-400 dark:text-gray-500 mr-1">
-                      └
-                    </span>
-                  )}
                   {subRow.label}
                 </div>
 
@@ -209,28 +206,36 @@ export default function WeeklyGrid({
                               key={`${entry.name}-${idx}`}
                               onClick={() => handleEmployeeClick(entry.name)}
                               className={cn(
-                                "employee-badge px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap",
+                                "employee-badge flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap",
                                 "hover:shadow-md active:scale-95",
                                 highlighted
                                   ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 shadow-md scale-105"
                                   : today
-                                    ? "bg-gray-700 dark:bg-gray-300 text-white dark:text-gray-900 hover:bg-gray-600 dark:hover:bg-gray-400"
-                                    : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600"
+                                    ? "bg-gray-600 dark:bg-gray-400 text-white dark:text-gray-900 hover:bg-gray-500 dark:hover:bg-gray-500"
+                                    : "bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
                               )}
                               aria-label={`${entry.name} 클릭하여 상세 스케줄 보기`}
                               aria-pressed={highlighted}
                             >
-                              {entry.name}
+                              <span>{entry.name}</span>
                               {showNote && entry.note && (
-                                <span
-                                  className={cn(
-                                    "ml-1 text-xs",
-                                    highlighted || today
-                                      ? "text-gray-300 dark:text-gray-600"
-                                      : "text-gray-500 dark:text-gray-400"
-                                  )}
-                                >
-                                  {formatNote(entry.note)}
+                                <span className="flex items-center gap-1.5">
+                                  <span
+                                    className={cn(
+                                      "dot-indicator",
+                                      "dot-afternoon"
+                                    )}
+                                  />
+                                  <span
+                                    className={cn(
+                                      "text-xs font-mono",
+                                      highlighted || today
+                                        ? "text-gray-300 dark:text-gray-600"
+                                        : "text-gray-500 dark:text-gray-400"
+                                    )}
+                                  >
+                                    {formatNote(entry.note)}
+                                  </span>
                                 </span>
                               )}
                             </button>

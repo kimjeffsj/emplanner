@@ -79,6 +79,11 @@
   --color-shift-afternoon-foreground: var(--shift-afternoon-foreground);
   --color-today-highlight: var(--today-highlight);
   --color-today-border: var(--today-border);
+
+  /* Dot indicator colors */
+  --color-dot-allday: var(--dot-allday);
+  --color-dot-morning: var(--dot-morning);
+  --color-dot-afternoon: var(--dot-afternoon);
 }
 
 :root {
@@ -137,15 +142,20 @@
   --sidebar-border: oklch(0.85 0.02 240);
   --sidebar-ring: oklch(0.55 0.15 250);
 
-  /* Schedule-specific colors */
-  --shift-allday: oklch(0.45 0.18 250);
-  --shift-allday-foreground: oklch(0.99 0 0);
-  --shift-morning: oklch(0.55 0.15 145);
-  --shift-morning-foreground: oklch(0.99 0 0);
-  --shift-afternoon: oklch(0.60 0.16 45);
-  --shift-afternoon-foreground: oklch(0.15 0.02 45);
+  /* Schedule-specific colors - Pastel version */
+  --shift-allday: #bfdbfe; /* blue-200 pastel */
+  --shift-allday-foreground: #1e40af; /* blue-800 */
+  --shift-morning: #bbf7d0; /* green-200 pastel */
+  --shift-morning-foreground: #166534; /* green-800 */
+  --shift-afternoon: #fde68a; /* amber-200 pastel */
+  --shift-afternoon-foreground: #92400e; /* amber-800 */
   --today-highlight: oklch(0.92 0.08 250);
   --today-border: oklch(0.55 0.18 250);
+
+  /* Dot indicator colors (for Option B) */
+  --dot-allday: #3b82f6; /* blue-500 */
+  --dot-morning: #22c55e; /* green-500 */
+  --dot-afternoon: #f59e0b; /* amber-500 */
 }
 
 .dark {
@@ -182,15 +192,20 @@
   --sidebar-border: #374151; /* gray-700 */
   --sidebar-ring: #6b7280; /* gray-500 */
 
-  /* Schedule-specific colors - dark mode */
-  --shift-allday: #60a5fa; /* blue-400 */
-  --shift-allday-foreground: #111827; /* gray-900 */
-  --shift-morning: #4ade80; /* green-400 */
-  --shift-morning-foreground: #111827; /* gray-900 */
-  --shift-afternoon: #fbbf24; /* amber-400 */
-  --shift-afternoon-foreground: #111827; /* gray-900 */
+  /* Schedule-specific colors - dark mode pastel */
+  --shift-allday: #93c5fd; /* blue-300 pastel */
+  --shift-allday-foreground: #1e3a8a; /* blue-900 */
+  --shift-morning: #86efac; /* green-300 pastel */
+  --shift-morning-foreground: #14532d; /* green-900 */
+  --shift-afternoon: #fcd34d; /* amber-300 pastel */
+  --shift-afternoon-foreground: #78350f; /* amber-900 */
   --today-highlight: #1e3a5f; /* dark blue tint */
   --today-border: #3b82f6; /* blue-500 */
+
+  /* Dot indicator colors - dark mode (with glow) */
+  --dot-allday: #60a5fa; /* blue-400 */
+  --dot-morning: #4ade80; /* green-400 */
+  --dot-afternoon: #fbbf24; /* amber-400 */
 }
 
 @layer base {
@@ -282,5 +297,37 @@
       margin-inline: 0;
       padding-inline: 0;
     }
+  }
+
+  /* Dot indicator styles with glow effect */
+  .dot-indicator {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+  }
+
+  .dot-allday {
+    background-color: var(--dot-allday);
+  }
+
+  .dot-morning {
+    background-color: var(--dot-morning);
+  }
+
+  .dot-afternoon {
+    background-color: var(--dot-afternoon);
+  }
+
+  /* Glow effect for dark mode */
+  .dark .dot-allday {
+    box-shadow: 0 0 8px rgba(96, 165, 250, 0.6);
+  }
+
+  .dark .dot-morning {
+    box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+  }
+
+  .dark .dot-afternoon {
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
   }
 }
