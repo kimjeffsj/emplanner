@@ -49,8 +49,11 @@ export default function WeeklyGrid({
 
   const isToday = (date: string): boolean => todayDate === date;
 
-  const shouldHighlight = (employeeName: string): boolean =>
-    selectedEmployee !== null && selectedEmployee === employeeName;
+  // Filter entries based on selected employee
+  const filterEntriesByEmployee = (entries: ScheduleEntry[]): ScheduleEntry[] => {
+    if (!selectedEmployee) return entries;
+    return entries.filter((entry) => entry.name === selectedEmployee);
+  };
 
   const handleEmployeeClick = (employeeName: string) => {
     if (onEmployeeClick) onEmployeeClick(employeeName);
@@ -82,6 +85,7 @@ export default function WeeklyGrid({
               <div
                 key={date}
                 role="columnheader"
+                aria-label={`${DAYS[index]} ${formatDate(date)}${isToday(date) ? " (오늘)" : ""}`}
                 className={cn(
                   "flex flex-col items-center p-3 text-center transition-colors border-r border-zinc-200 dark:border-zinc-800 last:border-r-0",
                   // [DESIGN] 오늘 날짜 헤더: 다크모드에서 너무 쨍하지 않게 Zinc-800 + 채도 낮은 Blue 사용
@@ -152,12 +156,13 @@ export default function WeeklyGrid({
 
                   {/* Cells */}
                   {weekDates.map((date, dayIndex) => {
-                    const entries = getEntriesForSubRow(
+                    const rawEntries = getEntriesForSubRow(
                       schedule.entries,
                       date,
                       shift.type,
                       subRow.fromTime
                     );
+                    const entries = filterEntriesByEmployee(rawEntries);
                     const today = isToday(date);
 
                     return (
@@ -175,7 +180,6 @@ export default function WeeklyGrid({
                       >
                         <div className="flex flex-col gap-2">
                           {entries.map((entry, idx) => {
-                            const highlighted = shouldHighlight(entry.name);
                             const showNote =
                               entry.note?.type === "until" ||
                               entry.note?.type === "from";
@@ -187,27 +191,20 @@ export default function WeeklyGrid({
                                 className={cn(
                                   "group flex items-center justify-between w-full px-2.5 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all cursor-pointer border",
                                   "hover:shadow-sm active:scale-[0.98]",
-                                  // [DESIGN] Badge 컬러 완전한 Zinc 모노톤으로 변경 (파란끼 제거)
-                                  highlighted
-                                    ? "bg-zinc-800 border-zinc-800 text-white shadow-md shadow-zinc-500/20 dark:bg-zinc-100 dark:border-zinc-100 dark:text-zinc-900" // 선택됨: 진한 회색/검정
-                                    : today
-                                      ? "bg-white dark:bg-zinc-800 border-zinc-300 dark:border-zinc-600 text-zinc-900 dark:text-zinc-100 hover:border-zinc-400 dark:hover:border-zinc-500" // 오늘
-                                      : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-300"
+                                  today
+                                    ? "bg-white dark:bg-zinc-800 border-zinc-300 dark:border-zinc-600 text-zinc-900 dark:text-zinc-100 hover:border-zinc-400 dark:hover:border-zinc-500"
+                                    : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-300"
                                 )}
                               >
                                 <span className="truncate">{entry.name}</span>
                                 {/* Dot Indicator (Time Note exists) */}
                                 {showNote && entry.note && (
                                   <div className="flex items-center gap-1.5 ml-2 shrink-0">
-                                    {/* [DESIGN] 예외 시간(until)은 Amber(주황) 계열로 경고 느낌 */}
                                     <span className="w-1.5 h-1.5 rounded-full ring-1 ring-inset ring-black/5 dark:ring-white/10 bg-amber-500 dark:bg-amber-400 shadow-[0_0_4px_rgba(245,158,11,0.4)]" />
-                                    {/* 모바일에서는 숨기고 PC(sm 이상)에서만 시간 표시 */}
                                     <span
                                       className={cn(
                                         "hidden sm:inline-block text-[10px] font-mono leading-none",
-                                        highlighted
-                                          ? "text-zinc-300 dark:text-zinc-600"
-                                          : "text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-600 dark:group-hover:text-zinc-300"
+                                        "text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-600 dark:group-hover:text-zinc-300"
                                       )}
                                     >
                                       {formatNote(entry.note)}

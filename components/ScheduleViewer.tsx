@@ -10,7 +10,7 @@ import {
   Employee,
 } from "@/types/schedule";
 
-const EmployeeSelector = dynamic(() => import("./EmployeeSelector"), {
+const EmployeeSearchBar = dynamic(() => import("./EmployeeSearchBar"), {
   ssr: false,
   loading: () => (
     <div className="h-14 w-55 rounded-xl border bg-white dark:bg-gray-800 animate-pulse" />
@@ -39,7 +39,7 @@ export default function ScheduleViewer({
   // URL에서 초기값 읽기
   const initialEmployee = searchParams.get("employee");
 
-  // 상태 관리: 선택된 직원 (null = 전체 보기, 하이라이트 용)
+  // 상태 관리: 선택된 직원 (null = 전체 보기, 필터링 용)
   const [selectedEmployee, setSelectedEmployee] = useState<string | null>(
     initialEmployee && employees.some((e) => e.name === initialEmployee)
       ? initialEmployee
@@ -163,7 +163,7 @@ export default function ScheduleViewer({
           selectedLocation={selectedLocation}
           onChange={setSelectedLocation}
         />
-        <EmployeeSelector
+        <EmployeeSearchBar
           employees={employeeNames}
           selectedEmployee={selectedEmployee}
           onChange={handleEmployeeChange}

@@ -98,7 +98,9 @@ describe("WeeklyGrid", () => {
     it("from note가 있는 직원은 서브행에 표시된다", () => {
       render(<WeeklyGrid schedule={mockWeekSchedule} />);
       // from note는 서브행 라벨로 표시됨 (예: "17:30~")
-      expect(screen.getByText("17:30~")).toBeInTheDocument();
+      // 서브행 헤더와 뱃지 인라인 두 곳에서 표시될 수 있음
+      const timeNotes = screen.getAllByText("17:30~");
+      expect(timeNotes.length).toBeGreaterThanOrEqual(1);
       // 직원 이름은 여전히 표시됨
       expect(screen.getByText("Minji")).toBeInTheDocument();
     });
@@ -206,6 +208,85 @@ describe("WeeklyGrid", () => {
 
       expect(screen.getByText("Jenny")).toBeInTheDocument();
       expect(screen.getByText("Ryan")).toBeInTheDocument();
+    });
+  });
+
+  describe("직원 필터링", () => {
+    it("selectedEmployee가 null이면 모든 직원을 표시한다", () => {
+      render(
+        <WeeklyGrid schedule={mockWeekSchedule} selectedEmployee={null} />
+      );
+
+      // 모든 직원이 표시되어야 함
+      expect(screen.getByText("Jenny")).toBeInTheDocument();
+      expect(screen.getByText("Ryan")).toBeInTheDocument();
+      expect(screen.getByText("Minji")).toBeInTheDocument();
+      expect(screen.getByText("Yuran")).toBeInTheDocument();
+    });
+
+    it("selectedEmployee가 지정되면 해당 직원만 표시한다", () => {
+      render(
+        <WeeklyGrid schedule={mockWeekSchedule} selectedEmployee="Ryan" />
+      );
+
+      // Ryan만 표시되어야 함
+      expect(screen.getByText("Ryan")).toBeInTheDocument();
+      // 다른 직원은 표시되지 않아야 함
+      expect(screen.queryByText("Jenny")).not.toBeInTheDocument();
+      expect(screen.queryByText("Minji")).not.toBeInTheDocument();
+      expect(screen.queryByText("Yuran")).not.toBeInTheDocument();
+    });
+
+    it("selectedEmployee가 undefined이면 모든 직원을 표시한다", () => {
+      render(<WeeklyGrid schedule={mockWeekSchedule} />);
+
+      // 모든 직원이 표시되어야 함
+      expect(screen.getByText("Jenny")).toBeInTheDocument();
+      expect(screen.getByText("Ryan")).toBeInTheDocument();
+      expect(screen.getByText("Minji")).toBeInTheDocument();
+      expect(screen.getByText("Yuran")).toBeInTheDocument();
+    });
+
+    it("필터링된 직원의 모든 날짜 스케줄이 표시된다", () => {
+      // Jenny는 일요일에 All day 근무
+      const multiDayEntries: ScheduleEntry[] = [
+        {
+          name: "Jenny",
+          date: "2024-01-14", // Sunday
+          dayOfWeek: "Sunday",
+          shift: "*",
+          location: "No.3",
+        },
+        {
+          name: "Jenny",
+          date: "2024-01-15", // Monday
+          dayOfWeek: "Monday",
+          shift: "11:00",
+          location: "No.3",
+        },
+        {
+          name: "Ryan",
+          date: "2024-01-14",
+          dayOfWeek: "Sunday",
+          shift: "*",
+          location: "No.3",
+        },
+      ];
+
+      const schedule: WeekSchedule = {
+        weekStart: "2024-01-14",
+        weekEnd: "2024-01-20",
+        location: "No.3",
+        entries: multiDayEntries,
+      };
+
+      render(<WeeklyGrid schedule={schedule} selectedEmployee="Jenny" />);
+
+      // Jenny의 버튼이 2개 있어야 함 (일요일, 월요일)
+      const jennyButtons = screen.getAllByText("Jenny");
+      expect(jennyButtons).toHaveLength(2);
+      // Ryan은 표시되지 않아야 함
+      expect(screen.queryByText("Ryan")).not.toBeInTheDocument();
     });
   });
 });
