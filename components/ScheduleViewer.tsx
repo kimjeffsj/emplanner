@@ -64,6 +64,19 @@ export default function ScheduleViewer({
   const currentSchedule =
     selectedLocation === "No.3" ? no3Schedule : westminsterSchedule;
 
+  // 각 로케이션별 필터된 스케줄 개수 계산 (선택된 직원이 있을 때만)
+  const locationCounts = useMemo(() => {
+    if (!selectedEmployee) return undefined;
+    return {
+      "No.3": no3Schedule.entries.filter(
+        (entry) => entry.name === selectedEmployee
+      ).length,
+      Westminster: westminsterSchedule.entries.filter(
+        (entry) => entry.name === selectedEmployee
+      ).length,
+    } as Record<Location, number>;
+  }, [no3Schedule.entries, westminsterSchedule.entries, selectedEmployee]);
+
   // 모달용 개인 스케줄 생성 함수 (클라이언트 사이드에서 필터링)
   const createEmployeeSchedule = (
     employeeName: string
@@ -166,6 +179,7 @@ export default function ScheduleViewer({
         <LocationTabs
           selectedLocation={selectedLocation}
           onChange={setSelectedLocation}
+          counts={locationCounts}
         />
         <EmployeeSearchBar
           employees={employeeNames}
