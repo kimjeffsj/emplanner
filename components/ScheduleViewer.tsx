@@ -24,7 +24,6 @@ interface ScheduleViewerProps {
   employees: Employee[];
   no3Schedule: WeekSchedule;
   westminsterSchedule: WeekSchedule;
-  employeeSchedules: Record<string, EmployeeWeekSchedule>;
   todayDate: string;
 }
 
@@ -32,7 +31,6 @@ export default function ScheduleViewer({
   employees,
   no3Schedule,
   westminsterSchedule,
-  employeeSchedules,
   todayDate,
 }: ScheduleViewerProps) {
   const searchParams = useSearchParams();
@@ -62,8 +60,45 @@ export default function ScheduleViewer({
   const currentSchedule =
     selectedLocation === "No.3" ? no3Schedule : westminsterSchedule;
 
+  // 모달용 개인 스케줄 생성 함수 (클라이언트 사이드에서 필터링)
+  const createEmployeeSchedule = (
+    employeeName: string
+  ): EmployeeWeekSchedule => {
+    const no3Entries = no3Schedule.entries.filter(
+      (entry) => entry.name === employeeName
+    );
+    const westminsterEntries = westminsterSchedule.entries.filter(
+      (entry) => entry.name === employeeName
+    );
+
+    const schedules = [];
+
+    if (no3Entries.length > 0) {
+      schedules.push({
+        location: "No.3" as Location,
+        entries: no3Entries,
+      });
+    }
+
+    if (westminsterEntries.length > 0) {
+      schedules.push({
+        location: "Westminster" as Location,
+        entries: westminsterEntries,
+      });
+    }
+
+    return {
+      employeeName,
+      weekStart: no3Schedule.weekStart || westminsterSchedule.weekStart,
+      weekEnd: no3Schedule.weekEnd || westminsterSchedule.weekEnd,
+      schedules,
+    };
+  };
+
   // 모달용 개인 스케줄
-  const modalSchedule = modalEmployee ? employeeSchedules[modalEmployee] : null;
+  const modalSchedule = modalEmployee
+    ? createEmployeeSchedule(modalEmployee)
+    : null;
 
   // 직원 선택 변경 시 URL 업데이트 (드롭다운에서 선택)
   const handleEmployeeChange = (employee: string | null) => {

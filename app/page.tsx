@@ -1,12 +1,7 @@
 import { Suspense } from "react";
-import {
-  getEmployees,
-  getWeekSchedule,
-  getEmployeeSchedule,
-} from "@/lib/google-sheets";
+import { getEmployees, getWeekSchedule } from "@/lib/google-sheets";
 import ScheduleViewer from "@/components/ScheduleViewer";
 import ThemeToggle from "@/components/ThemeToggle";
-import { EmployeeWeekSchedule } from "@/types/schedule";
 
 // ISR: 60초마다 revalidate
 export const revalidate = 60;
@@ -14,25 +9,15 @@ export const revalidate = 60;
 export default async function Home() {
   // 오늘 날짜 (YYYY-MM-DD) - 로컬 시간 기준
   const now = new Date();
-  const todayDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const todayDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   // 데이터 fetching (Server Component에서 실행)
+  // 직원 목록과 두 로케이션의 스케줄만 fetch (총 3번의 API 호출)
   const [employees, no3Schedule, westminsterSchedule] = await Promise.all([
     getEmployees(),
     getWeekSchedule("No.3"),
     getWeekSchedule("Westminster"),
   ]);
-
-  // 각 직원의 개인 스케줄 미리 fetch (클라이언트에서 추가 요청 없이 즉시 표시)
-  const employeeSchedulesArray = await Promise.all(
-    employees.map((emp) => getEmployeeSchedule(emp.name))
-  );
-
-  // Record<string, EmployeeWeekSchedule> 형태로 변환
-  const employeeSchedules: Record<string, EmployeeWeekSchedule> = {};
-  employeeSchedulesArray.forEach((schedule) => {
-    employeeSchedules[schedule.employeeName] = schedule;
-  });
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors">
@@ -56,7 +41,6 @@ export default async function Home() {
             employees={employees}
             no3Schedule={no3Schedule}
             westminsterSchedule={westminsterSchedule}
-            employeeSchedules={employeeSchedules}
             todayDate={todayDate}
           />
         </Suspense>
