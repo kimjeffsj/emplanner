@@ -10,10 +10,10 @@ export default function ShiftBadge({ shift }: ShiftBadgeProps) {
   const displayText = shift === "*" ? "*" : `${shift}~`;
   const ariaLabel =
     shift === "*"
-      ? "종일 근무"
+      ? "All day shift"
       : shift === "11:00"
-        ? "오전 11시부터 근무"
-        : "오후 3시 30분부터 근무";
+        ? "Shift from 11:00 AM"
+        : "Shift from 3:30 PM";
 
   // Determine variant based on shift type (using schedule-specific variants)
   const getVariant = (): "allday" | "morning" | "afternoon" => {

@@ -60,14 +60,14 @@ export default function WeeklyGrid({
     <div
       className="mobile-scroll-container w-full -mx-4 sm:mx-0"
       role="region"
-      aria-label="주간 스케줄 표"
+      aria-label="Weekly schedule table"
     >
       <div className="mobile-scroll-content w-full overflow-x-auto px-4 sm:px-0">
         <div
           // [DESIGN] 테두리와 배경을 Zinc 톤으로 변경하여 차분하고 고급스러운 느낌 (눈의 피로 감소)
           className="min-w-[840px] sm:min-w-0 bg-zinc-100 dark:bg-zinc-900 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-sm"
           role="table"
-          aria-label="주간 근무 스케줄"
+          aria-label="Weekly work schedule"
         >
           {/* Header Row */}
           <div

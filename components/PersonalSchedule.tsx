@@ -34,7 +34,7 @@ export default function PersonalSchedule({
   return (
     <section
       className="personal-schedule space-y-4"
-      aria-label={`${schedule.employeeName}의 주간 스케줄`}
+      aria-label={`${schedule.employeeName}'s weekly schedule`}
     >
       {/* Header with employee name */}
       <Card className="personal-header">
@@ -48,7 +48,7 @@ export default function PersonalSchedule({
         </CardHeader>
         {!hasNoSchedules && (
           <CardContent className="total-days pt-0">
-            총 <span className="day-count font-bold text-primary">{totalWorkDays}</span>일
+            Total <span className="day-count font-bold text-primary">{totalWorkDays}</span> days
           </CardContent>
         )}
       </Card>
@@ -57,7 +57,7 @@ export default function PersonalSchedule({
       {hasNoSchedules && (
         <Card className="empty-state" role="status" aria-live="polite">
           <CardContent className="text-center py-8 text-muted-foreground">
-            이번 주 스케줄이 없습니다
+            No schedule this week
           </CardContent>
         </Card>
       )}
@@ -67,15 +67,15 @@ export default function PersonalSchedule({
         <section
           key={locationSchedule.location}
           className="location-section space-y-2"
-          aria-label={`${locationSchedule.location} 매장 스케줄`}
+          aria-label={`${locationSchedule.location} schedule`}
         >
           <div className="location-header flex items-center justify-between px-2">
             <h3 className="location-name font-semibold text-lg">{locationSchedule.location}</h3>
-            <span className="location-days text-sm text-muted-foreground" aria-label={`${locationSchedule.entries.length}일 근무`}>
-              {locationSchedule.entries.length}일
+            <span className="location-days text-sm text-muted-foreground" aria-label={`${locationSchedule.entries.length} days`}>
+              {locationSchedule.entries.length} days
             </span>
           </div>
-          <div className="entries-list space-y-2" role="list" aria-label="근무 일정 목록">
+          <div className="entries-list space-y-2" role="list" aria-label="Schedule list">
             {locationSchedule.entries.map((entry, idx) => (
               <div key={`${entry.date}-${entry.shift}-${idx}`} role="listitem">
                 <ScheduleCard

@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Smart Schedule Viewer",
     short_name: "Schedule",
-    description: "직원 근무표를 쉽게 확인하는 앱",
+    description: "Easily check employee work schedules",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",

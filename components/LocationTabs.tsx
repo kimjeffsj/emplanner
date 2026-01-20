@@ -18,7 +18,7 @@ export default function LocationTabs({
     <div
       className="flex gap-2 overflow-x-auto scrollbar-hide"
       role="tablist"
-      aria-label="매장 선택"
+      aria-label="Select location"
     >
       {locations.map((location) => (
         <button

@@ -77,8 +77,8 @@ export default function PWAInstallBanner() {
         <div className="flex items-center gap-3">
           <Download className="w-6 h-6 text-blue-400" />
           <div>
-            <p className="font-semibold">홈 화면에 추가</p>
-            <p className="text-sm text-slate-300">앱처럼 빠르게 접근하세요</p>
+            <p className="font-semibold">Add to Home Screen</p>
+            <p className="text-sm text-slate-300">Access quickly like an app</p>
           </div>
         </div>
 
@@ -86,14 +86,14 @@ export default function PWAInstallBanner() {
           <button
             onClick={handleInstall}
             className="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg font-medium transition-colors"
-            aria-label="설치"
+            aria-label="Install"
           >
-            설치
+            Install
           </button>
           <button
             onClick={handleDismiss}
             className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
-            aria-label="닫기"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>

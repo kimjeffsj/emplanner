@@ -42,10 +42,10 @@ export default async function Home() {
         <header className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-              스케줄
+              Schedule
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              직원 근무 일정 관리
+              Employee work schedule
             </p>
           </div>
           <ThemeToggle />

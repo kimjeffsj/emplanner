@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Schedule Viewer",
-  description: "직원 근무표를 쉽게 확인하는 앱",
+  description: "Easily check employee work schedules",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -39,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

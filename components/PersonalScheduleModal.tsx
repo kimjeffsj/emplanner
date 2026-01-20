@@ -33,10 +33,10 @@ export default function PersonalScheduleModal({
       >
         <SheetHeader className="mb-4">
           <SheetTitle className="text-xl font-bold">
-            {schedule.employeeName}의 스케줄
+            {schedule.employeeName}&apos;s Schedule
           </SheetTitle>
           <SheetDescription>
-            이번 주 근무 일정을 확인하세요
+            View this week&apos;s work schedule
           </SheetDescription>
         </SheetHeader>
         <PersonalSchedule schedule={schedule} todayDate={todayDate} />

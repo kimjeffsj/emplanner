@@ -31,14 +31,14 @@ export default function EmployeeSelector({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const displayText = selectedEmployee || "전체 직원";
+  const displayText = selectedEmployee || "All Employees";
 
   return (
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full sm:w-auto min-w-[220px] flex items-center justify-between gap-3 px-5 py-3.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl hover:border-zinc-300 dark:hover:border-zinc-700 transition-all shadow-sm hover:shadow"
-        aria-label="직원 선택"
+        aria-label="Select employee"
         aria-expanded={isOpen}
       >
         <div className="flex items-center gap-3">
@@ -70,7 +70,7 @@ export default function EmployeeSelector({
                   : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"
               }`}
             >
-              <span className="font-medium">전체 직원</span>
+              <span className="font-medium">All Employees</span>
               {selectedEmployee === null && <Check className="w-4 h-4" />}
             </button>
             <div className="my-2 h-px bg-zinc-100 dark:bg-zinc-800" />
