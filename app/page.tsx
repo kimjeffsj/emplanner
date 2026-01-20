@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { getEmployees, getWeekSchedule } from "@/lib/google-sheets";
+import { getWeekSchedule } from "@/lib/google-sheets";
 import ScheduleViewer from "@/components/ScheduleViewer";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -12,9 +12,8 @@ export default async function Home() {
   const todayDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   // 데이터 fetching (Server Component에서 실행)
-  // 직원 목록과 두 로케이션의 스케줄만 fetch (총 3번의 API 호출)
-  const [employees, no3Schedule, westminsterSchedule] = await Promise.all([
-    getEmployees(),
+  // 두 로케이션의 스케줄 fetch (총 2번의 API 호출)
+  const [no3Schedule, westminsterSchedule] = await Promise.all([
     getWeekSchedule("No.3"),
     getWeekSchedule("Westminster"),
   ]);
@@ -38,7 +37,6 @@ export default async function Home() {
 
         <Suspense fallback={<div className="loading">Loading...</div>}>
           <ScheduleViewer
-            employees={employees}
             no3Schedule={no3Schedule}
             westminsterSchedule={westminsterSchedule}
             todayDate={todayDate}

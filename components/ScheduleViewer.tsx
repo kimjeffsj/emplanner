@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
   Location,
   WeekSchedule,
   EmployeeWeekSchedule,
-  Employee,
 } from "@/types/schedule";
 
 const EmployeeSearchBar = dynamic(() => import("./EmployeeSearchBar"), {
@@ -21,14 +20,12 @@ import WeeklyGrid from "./WeeklyGrid";
 import PersonalScheduleModal from "./PersonalScheduleModal";
 
 interface ScheduleViewerProps {
-  employees: Employee[];
   no3Schedule: WeekSchedule;
   westminsterSchedule: WeekSchedule;
   todayDate: string;
 }
 
 export default function ScheduleViewer({
-  employees,
   no3Schedule,
   westminsterSchedule,
   todayDate,
@@ -36,12 +33,22 @@ export default function ScheduleViewer({
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  // 두 스케줄에서 직원 이름 추출 (중복 제거, 알파벳 순)
+  const employeeNames = useMemo(() => {
+    const namesSet = new Set<string>();
+    no3Schedule.entries.forEach((entry) => namesSet.add(entry.name));
+    westminsterSchedule.entries.forEach((entry) => namesSet.add(entry.name));
+    return Array.from(namesSet).sort((a, b) =>
+      a.toLowerCase().localeCompare(b.toLowerCase())
+    );
+  }, [no3Schedule.entries, westminsterSchedule.entries]);
+
   // URL에서 초기값 읽기
   const initialEmployee = searchParams.get("employee");
 
   // 상태 관리: 선택된 직원 (null = 전체 보기, 필터링 용)
   const [selectedEmployee, setSelectedEmployee] = useState<string | null>(
-    initialEmployee && employees.some((e) => e.name === initialEmployee)
+    initialEmployee && employeeNames.includes(initialEmployee)
       ? initialEmployee
       : null
   );
@@ -52,9 +59,6 @@ export default function ScheduleViewer({
   // 상태 관리: 모달 (이름 클릭 시 열림)
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalEmployee, setModalEmployee] = useState<string | null>(null);
-
-  // 직원 이름 목록 추출
-  const employeeNames = employees.map((e) => e.name);
 
   // 현재 선택된 로케이션의 스케줄
   const currentSchedule =
@@ -129,12 +133,12 @@ export default function ScheduleViewer({
   // URL 파라미터 변경 감지 (브라우저 뒤로/앞으로 버튼)
   useEffect(() => {
     const employeeFromUrl = searchParams.get("employee");
-    if (employeeFromUrl && employees.some((e) => e.name === employeeFromUrl)) {
+    if (employeeFromUrl && employeeNames.includes(employeeFromUrl)) {
       setSelectedEmployee(employeeFromUrl);
     } else if (!employeeFromUrl) {
       setSelectedEmployee(null);
     }
-  }, [searchParams, employees]);
+  }, [searchParams, employeeNames]);
 
   // 주간 날짜 범위 계산
   const weekStart =

@@ -16,7 +16,7 @@ export default function LocationTabs({
 
   return (
     <div
-      className="flex gap-2 overflow-x-auto scrollbar-hide"
+      className="flex gap-2 p-1 overflow-x-auto overflow-y-hidden scrollbar-hide"
       role="tablist"
       aria-label="Select location"
     >

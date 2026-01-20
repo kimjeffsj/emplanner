@@ -1,12 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ScheduleViewer from "@/components/ScheduleViewer";
-import {
-  Employee,
-  WeekSchedule,
-  EmployeeWeekSchedule,
-  ScheduleEntry,
-} from "@/types/schedule";
+import { WeekSchedule, ScheduleEntry } from "@/types/schedule";
 
 // Mock Next.js navigation hooks
 const mockReplace = jest.fn();
@@ -21,13 +16,6 @@ jest.mock("next/navigation", () => ({
 }));
 
 describe("ScheduleViewer", () => {
-  // Mock 직원 목록
-  const mockEmployees: Employee[] = [
-    { name: "Jenny" },
-    { name: "Ryan" },
-    { name: "Minji" },
-  ];
-
   // Mock No.3 스케줄
   const mockNo3Entries: ScheduleEntry[] = [
     {
@@ -71,48 +59,9 @@ describe("ScheduleViewer", () => {
     entries: mockWestminsterEntries,
   };
 
-  // Mock 개인 스케줄
-  const mockEmployeeSchedules: Record<string, EmployeeWeekSchedule> = {
-    Jenny: {
-      employeeName: "Jenny",
-      weekStart: "2024-01-14",
-      weekEnd: "2024-01-20",
-      schedules: [
-        {
-          location: "No.3",
-          entries: [mockNo3Entries[0]],
-        },
-      ],
-    },
-    Ryan: {
-      employeeName: "Ryan",
-      weekStart: "2024-01-14",
-      weekEnd: "2024-01-20",
-      schedules: [
-        {
-          location: "No.3",
-          entries: [mockNo3Entries[1]],
-        },
-      ],
-    },
-    Minji: {
-      employeeName: "Minji",
-      weekStart: "2024-01-14",
-      weekEnd: "2024-01-20",
-      schedules: [
-        {
-          location: "Westminster",
-          entries: [mockWestminsterEntries[0]],
-        },
-      ],
-    },
-  };
-
   const defaultProps = {
-    employees: mockEmployees,
     no3Schedule: mockNo3Schedule,
     westminsterSchedule: mockWestminsterSchedule,
-    employeeSchedules: mockEmployeeSchedules,
     todayDate: "2024-01-15",
   };
 
@@ -147,9 +96,10 @@ describe("ScheduleViewer", () => {
       const searchInput = screen.getByRole("combobox");
       await user.click(searchInput);
 
-      // 모든 직원이 드롭다운 옵션으로 표시되어야 함
-      for (const emp of mockEmployees) {
-        const option = screen.getByRole("option", { name: emp.name });
+      // 스케줄에 있는 모든 직원이 드롭다운 옵션으로 표시되어야 함
+      const expectedEmployees = ["Jenny", "Minji", "Ryan"]; // 알파벳 순
+      for (const name of expectedEmployees) {
+        const option = screen.getByRole("option", { name });
         expect(option).toBeInTheDocument();
       }
     });

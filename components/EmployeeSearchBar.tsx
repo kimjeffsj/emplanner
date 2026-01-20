@@ -99,8 +99,7 @@ export default function EmployeeSearchBar({
     inputRef.current?.focus();
   };
 
-  const showNoResults =
-    inputValue.trim() && filteredEmployees.length === 0;
+  const showNoResults = inputValue.trim() && filteredEmployees.length === 0;
 
   return (
     <div className="relative" ref={containerRef}>
@@ -116,7 +115,7 @@ export default function EmployeeSearchBar({
           aria-expanded={isOpen}
           aria-controls="employee-listbox"
           aria-autocomplete="list"
-          placeholder="직원 검색..."
+          placeholder="Search"
           value={inputValue}
           onChange={handleInputChange}
           onFocus={handleInputFocus}
@@ -127,7 +126,7 @@ export default function EmployeeSearchBar({
           <button
             type="button"
             onClick={handleClear}
-            aria-label="선택 해제"
+            aria-label="Clear"
             className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
           >
             <X className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
@@ -155,7 +154,7 @@ export default function EmployeeSearchBar({
                   : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"
               }`}
             >
-              <span className="font-medium">전체 직원</span>
+              <span className="font-medium">All employees</span>
               {selectedEmployee === null && <Check className="w-4 h-4" />}
             </button>
 
@@ -167,7 +166,7 @@ export default function EmployeeSearchBar({
             {/* No Results */}
             {showNoResults && (
               <div className="px-4 py-3 text-zinc-500 dark:text-zinc-400 text-sm">
-                검색 결과 없음
+                No results found
               </div>
             )}
 
