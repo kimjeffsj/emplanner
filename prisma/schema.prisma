@@ -1,0 +1,62 @@
+// Prisma schema for Chicko Schedule
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// 주차 정보 테이블
+model Week {
+  id        Int      @id @default(autoincrement())
+  weekStart DateTime @unique @map("week_start") @db.Date
+  weekEnd   DateTime @map("week_end") @db.Date
+  isCurrent Boolean  @default(false) @map("is_current")
+  syncedAt  DateTime @default(now()) @map("synced_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  entries ScheduleEntry[]
+
+  @@map("weeks")
+}
+
+// 스케줄 엔트리 테이블
+model ScheduleEntry {
+  id           Int      @id @default(autoincrement())
+  weekId       Int      @map("week_id")
+  employeeName String   @map("employee_name") @db.VarChar(100)
+  date         DateTime @db.Date
+  dayOfWeek    String   @map("day_of_week") @db.VarChar(10)
+  shift        String   @db.VarChar(10) // '*', '11:00', '15:30'
+  location     String   @db.VarChar(20) // 'No.3', 'Westminster'
+  noteType     String?  @map("note_type") @db.VarChar(10) // 'until', 'from', null
+  noteTime     String?  @map("note_time") @db.VarChar(5) // 'HH:MM' or null
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relations
+  week Week @relation(fields: [weekId], references: [id], onDelete: Cascade)
+
+  @@index([weekId])
+  @@index([employeeName])
+  @@index([date])
+  @@index([location])
+  @@index([weekId, location])
+  @@map("schedule_entries")
+}
+
+// 동기화 로그 테이블 (디버깅용)
+model SyncLog {
+  id            Int      @id @default(autoincrement())
+  syncType      String   @map("sync_type") @db.VarChar(20) // 'full', 'incremental', 'cleanup'
+  status        String   @db.VarChar(10) // 'success', 'error'
+  message       String?  @db.Text
+  recordsSynced Int      @default(0) @map("records_synced")
+  durationMs    Int?     @map("duration_ms")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("sync_logs")
+}

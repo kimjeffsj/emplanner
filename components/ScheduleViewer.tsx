@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
@@ -8,6 +8,7 @@ import {
   WeekSchedule,
   EmployeeWeekSchedule,
 } from "@/types/schedule";
+import WeekNavigation from "./WeekNavigation";
 
 const EmployeeSearchBar = dynamic(() => import("./EmployeeSearchBar"), {
   ssr: false,
@@ -18,20 +19,31 @@ const EmployeeSearchBar = dynamic(() => import("./EmployeeSearchBar"), {
 import LocationTabs from "./LocationTabs";
 import WeeklyGrid from "./WeeklyGrid";
 import PersonalScheduleModal from "./PersonalScheduleModal";
+import ScheduleSkeleton from "./ScheduleSkeleton";
 
 interface ScheduleViewerProps {
-  no3Schedule: WeekSchedule;
-  westminsterSchedule: WeekSchedule;
+  initialNo3Schedule: WeekSchedule;
+  initialWestminsterSchedule: WeekSchedule;
+  initialWeekStart: string;
+  availableWeeks: string[];
   todayDate: string;
 }
 
 export default function ScheduleViewer({
-  no3Schedule,
-  westminsterSchedule,
+  initialNo3Schedule,
+  initialWestminsterSchedule,
+  initialWeekStart,
+  availableWeeks,
   todayDate,
 }: ScheduleViewerProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  // 주간 스케줄 상태
+  const [currentWeekStart, setCurrentWeekStart] = useState(initialWeekStart);
+  const [no3Schedule, setNo3Schedule] = useState(initialNo3Schedule);
+  const [westminsterSchedule, setWestminsterSchedule] = useState(initialWestminsterSchedule);
+  const [isLoadingWeek, setIsLoadingWeek] = useState(false);
 
   // 두 스케줄에서 직원 이름 추출 (중복 제거, 알파벳 순)
   const employeeNames = useMemo(() => {
@@ -63,6 +75,61 @@ export default function ScheduleViewer({
   // 현재 선택된 로케이션의 스케줄
   const currentSchedule =
     selectedLocation === "No.3" ? no3Schedule : westminsterSchedule;
+
+  // 주간 네비게이션 가능 여부 계산
+  const canNavigatePrevious = useMemo(() => {
+    const currentIndex = availableWeeks.indexOf(currentWeekStart);
+    return currentIndex < availableWeeks.length - 1; // 배열이 최신순이므로
+  }, [currentWeekStart, availableWeeks]);
+
+  const canNavigateNext = useMemo(() => {
+    const currentIndex = availableWeeks.indexOf(currentWeekStart);
+    return currentIndex > 0; // 배열이 최신순이므로
+  }, [currentWeekStart, availableWeeks]);
+
+  // 주간 변경 핸들러
+  const handleWeekChange = useCallback(async (newWeekStart: string) => {
+    if (!availableWeeks.includes(newWeekStart)) return;
+    if (newWeekStart === currentWeekStart) return;
+
+    setIsLoadingWeek(true);
+    try {
+      const response = await fetch(`/api/schedule/${newWeekStart}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch schedule");
+      }
+      const data = await response.json();
+
+      setNo3Schedule(data.no3Schedule);
+      setWestminsterSchedule(data.westminsterSchedule);
+      setCurrentWeekStart(newWeekStart);
+
+      // URL 업데이트 (week 파라미터 추가)
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("week", newWeekStart);
+      router.replace(`?${params.toString()}`, { scroll: false });
+    } catch (error) {
+      console.error("Failed to fetch schedule:", error);
+    } finally {
+      setIsLoadingWeek(false);
+    }
+  }, [availableWeeks, currentWeekStart, searchParams, router]);
+
+  // 이전 주로 이동
+  const handlePreviousWeek = useCallback(() => {
+    const currentIndex = availableWeeks.indexOf(currentWeekStart);
+    if (currentIndex < availableWeeks.length - 1) {
+      handleWeekChange(availableWeeks[currentIndex + 1]);
+    }
+  }, [availableWeeks, currentWeekStart, handleWeekChange]);
+
+  // 다음 주로 이동
+  const handleNextWeek = useCallback(() => {
+    const currentIndex = availableWeeks.indexOf(currentWeekStart);
+    if (currentIndex > 0) {
+      handleWeekChange(availableWeeks[currentIndex - 1]);
+    }
+  }, [availableWeeks, currentWeekStart, handleWeekChange]);
 
   // 각 로케이션별 필터된 스케줄 개수 계산 (선택된 직원이 있을 때만)
   const locationCounts = useMemo(() => {
@@ -122,13 +189,19 @@ export default function ScheduleViewer({
     setSelectedEmployee(employee);
 
     // URL 쿼리 파라미터 업데이트
+    const params = new URLSearchParams(searchParams.toString());
     if (employee) {
-      router.replace(`?employee=${encodeURIComponent(employee)}`, {
-        scroll: false,
-      });
+      params.set("employee", employee);
     } else {
-      router.replace("/", { scroll: false });
+      params.delete("employee");
     }
+
+    if (currentWeekStart !== initialWeekStart) {
+      params.set("week", currentWeekStart);
+    }
+
+    const queryString = params.toString();
+    router.replace(queryString ? `?${queryString}` : "/", { scroll: false });
   };
 
   // 그리드에서 직원 이름 클릭 시 모달 열기
@@ -151,35 +224,29 @@ export default function ScheduleViewer({
     } else if (!employeeFromUrl) {
       setSelectedEmployee(null);
     }
-  }, [searchParams, employeeNames]);
 
-  // 주간 날짜 범위 계산
-  const weekStart =
-    currentSchedule.weekStart || new Date().toISOString().split("T")[0];
-
-  const getWeekRange = (): string => {
-    const start = new Date(weekStart);
-    const end = new Date(start);
-    end.setDate(start.getDate() + 6);
-
-    const formatDate = (d: Date) => {
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${year}.${month}.${day}`;
-    };
-
-    return `${formatDate(start)} - ${formatDate(end)}`;
-  };
+    const weekFromUrl = searchParams.get("week");
+    if (weekFromUrl && availableWeeks.includes(weekFromUrl) && weekFromUrl !== currentWeekStart) {
+      handleWeekChange(weekFromUrl);
+    }
+  }, [searchParams, employeeNames, availableWeeks, currentWeekStart, handleWeekChange]);
 
   return (
     <div className="schedule-viewer">
-      {/* Controls Bar: 로케이션 탭 (좌측) + 직원 드롭다운 (우측) */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
+      {/* Controls Bar: 로케이션 탭 (좌측) + 주간 네비게이션 (중앙) + 직원 검색 (우측) */}
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-6">
         <LocationTabs
           selectedLocation={selectedLocation}
           onChange={setSelectedLocation}
           counts={locationCounts}
+        />
+        <WeekNavigation
+          weekStart={currentWeekStart}
+          onPreviousWeek={handlePreviousWeek}
+          onNextWeek={handleNextWeek}
+          canNavigatePrevious={canNavigatePrevious}
+          canNavigateNext={canNavigateNext}
+          isLoading={isLoadingWeek}
         />
         <EmployeeSearchBar
           employees={employeeNames}
@@ -189,12 +256,16 @@ export default function ScheduleViewer({
       </div>
 
       {/* 주간 그리드 (선택된 직원 하이라이트) */}
-      <WeeklyGrid
-        schedule={currentSchedule}
-        todayDate={todayDate}
-        selectedEmployee={selectedEmployee}
-        onEmployeeClick={handleEmployeeClick}
-      />
+      {isLoadingWeek ? (
+        <ScheduleSkeleton variant="grid" />
+      ) : (
+        <WeeklyGrid
+          schedule={currentSchedule}
+          todayDate={todayDate}
+          selectedEmployee={selectedEmployee}
+          onEmployeeClick={handleEmployeeClick}
+        />
+      )}
 
       {/* PersonalSchedule 모달 */}
       <PersonalScheduleModal
