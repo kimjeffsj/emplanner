@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import PWAInstallBanner from "@/components/PWAInstallBanner";
+import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,6 +21,11 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "default",
     title: "Schedule",
+  },
+  icons: {
+    apple: [
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
   },
   formatDetection: {
     telephone: false,
@@ -45,6 +51,7 @@ export default function RootLayout({
       >
         {children}
         <PWAInstallBanner />
+        <ServiceWorkerRegistration />
       </body>
     </html>
   );
