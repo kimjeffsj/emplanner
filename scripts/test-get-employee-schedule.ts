@@ -16,8 +16,8 @@ async function testGetEmployeeSchedule() {
   console.log("🔄 getEmployeeSchedule() 테스트 시작...\n");
 
   try {
-    // Yuran 스케줄 조회
-    const employeeName = "Yuran";
+    // John 스케줄 조회
+    const employeeName = "John";
     console.log(`📋 ${employeeName} 스케줄 조회 중...`);
     const schedule = await getEmployeeSchedule(employeeName);
 

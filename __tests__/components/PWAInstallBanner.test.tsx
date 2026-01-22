@@ -70,7 +70,7 @@ describe("PWAInstallBanner", () => {
 
       // 배너가 표시됨
       expect(await screen.findByRole("banner")).toBeInTheDocument();
-      expect(screen.getByText(/홈 화면에 추가/)).toBeInTheDocument();
+      expect(screen.getByText(/Add to Home Screen/)).toBeInTheDocument();
     });
 
     it("이미 설치된 경우(standalone) 배너를 표시하지 않는다", () => {
@@ -211,7 +211,7 @@ describe("PWAInstallBanner", () => {
         window.dispatchEvent(promptEvent);
       });
 
-      expect(await screen.findByText(/홈 화면에 추가/)).toBeInTheDocument();
+      expect(await screen.findByText(/Add to Home Screen/)).toBeInTheDocument();
     });
   });
 });

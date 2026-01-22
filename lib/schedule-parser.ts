@@ -7,15 +7,15 @@ import type {
 
 /**
  * 직원 Name과 시간 비고를 파싱
- * @param input - 파싱할 문자열 (예: "Jenny(until 17:00)" 또는 "Ryan")
+ * @param input - 파싱할 문자열 (예: "Jane(until 17:00)" 또는 "John")
  * @returns Name과 비고 객체
  *
  * @example
- * parseTimeNote("Jenny(until 17:00)")
- * // { name: "Jenny", note: { type: "until", time: "17:00" } }
+ * parseTimeNote("Jane(until 17:00)")
+ * // { name: "Jane", note: { type: "until", time: "17:00" } }
  *
- * parseTimeNote("Ryan")
- * // { name: "Ryan", note: undefined }
+ * parseTimeNote("John")
+ * // { name: "John", note: undefined }
  */
 export function parseTimeNote(input: string): {
   name: string;
@@ -33,7 +33,7 @@ export function parseTimeNote(input: string): {
   }
 
   // 정규식: Name(until|from 시간) 형태 파싱
-  // 예: "Jenny(until 17:00)" → ["Jenny(until 17:00)", "Jenny", "until", "17:00"]
+  // 예: "Jane(until 17:00)" → ["Jane(until 17:00)", "Jane", "until", "17:00"]
   const regex = /^(.+?)\((until|from)\s+(\d{2}:\d{2})\)$/;
   const match = trimmed.match(regex);
 
@@ -58,12 +58,12 @@ export function parseTimeNote(input: string): {
 
 /**
  * 직원 목록 파싱
- * @param rows - Google Sheets에서 가져온 2D 배열 (예: [["Name"], ["Yuran"], ["Hyeonwoo"]])
+ * @param rows - Google Sheets에서 가져온 2D 배열 (예: [["Name"], ["John"], ["Jane"]])
  * @returns 직원 Name 배열
  *
  * @example
- * parseEmployees([["Name"], ["Yuran"], ["Hyeonwoo"]])
- * // ["Yuran", "Hyeonwoo"]
+ * parseEmployees([["Name"], ["John"], ["Jane"]])
+ * // ["John", "Jane"]
  */
 export function parseEmployees(rows: string[][]): string[] {
   // 첫 번째 행은 헤더이므로 스킵
@@ -83,7 +83,7 @@ export function parseEmployees(rows: string[][]): string[] {
  * getShiftType("11:00")  // "11:00"
  * getShiftType("15:30")  // "15:30"
  * getShiftType("")       // null
- * getShiftType("Yuran")  // null
+ * getShiftType("John")  // null
  */
 export function getShiftType(value: string): ShiftType | null {
   const trimmed = value.trim();
@@ -112,11 +112,11 @@ export function getShiftType(value: string): ShiftType | null {
  * const mockData = [
  *   ["No.3", "Sunday", "Monday", ...],
  *   ["", "2025-01-05", "2025-01-06", ...],
- *   ["*", "", "Hyeonwoo", ...],
- *   ["11:00", "Yuran", "K", ...],
+ *   ["*", "", "John", ...],
+ *   ["11:00", "Jane", "K", ...],
  * ];
  * parseScheduleSheet(mockData, "No.3")
- * // [{ name: "Hyeonwoo", date: "2025-01-06", dayOfWeek: "Monday", shift: "*", location: "No.3" }, ...]
+ * // [{ name: "John", date: "2025-01-06", dayOfWeek: "Monday", shift: "*", location: "No.3" }, ...]
  */
 export function parseScheduleSheet(
   rows: string[][],

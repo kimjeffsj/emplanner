@@ -8,10 +8,10 @@ import type { Location, ScheduleEntry } from "@/types/schedule";
 
 describe("parseTimeNote", () => {
   it('should parse name with "until" time note', () => {
-    const result = parseTimeNote("Jenny(until 17:00)");
+    const result = parseTimeNote("Jane(until 17:00)");
 
     expect(result).toEqual({
-      name: "Jenny",
+      name: "Jane",
       note: {
         type: "until",
         time: "17:00",
@@ -20,10 +20,10 @@ describe("parseTimeNote", () => {
   });
 
   it('should parse name with "from" time note', () => {
-    const result = parseTimeNote("Minji(from 17:30)");
+    const result = parseTimeNote("Alice(from 17:30)");
 
     expect(result).toEqual({
-      name: "Minji",
+      name: "Alice",
       note: {
         type: "from",
         time: "17:30",
@@ -32,20 +32,20 @@ describe("parseTimeNote", () => {
   });
 
   it("should parse name without time note", () => {
-    const result = parseTimeNote("Ryan");
+    const result = parseTimeNote("John");
 
     expect(result).toEqual({
-      name: "Ryan",
+      name: "John",
       note: undefined,
     });
   });
 
   // Edge cases
   it("should handle name with extra spaces", () => {
-    const result = parseTimeNote("  Jenny  (until 17:00)  ");
+    const result = parseTimeNote("  Jane  (until 17:00)  ");
 
     expect(result).toEqual({
-      name: "Jenny",
+      name: "Jane",
       note: {
         type: "until",
         time: "17:00",
@@ -67,49 +67,49 @@ describe("parseEmployees", () => {
   it("should parse employee list from 2D array", () => {
     const mockData = [
       ["Name"], // 헤더
-      ["Yuran"],
-      ["Hyeonwoo"],
-      ["Jenny"],
-      ["Minji"],
+      ["John"],
+      ["Jane"],
+      ["Alice"],
+      ["Bob"],
     ];
 
     const result = parseEmployees(mockData);
 
-    expect(result).toEqual(["Yuran", "Hyeonwoo", "Jenny", "Minji"]);
+    expect(result).toEqual(["John", "Jane", "Alice", "Bob"]);
   });
 
   it("should skip header row", () => {
     const mockData = [
       ["Name"], // 헤더는 스킵되어야 함
-      ["Ryan"],
+      ["John"],
     ];
 
     const result = parseEmployees(mockData);
 
-    expect(result).toEqual(["Ryan"]);
+    expect(result).toEqual(["John"]);
     expect(result).not.toContain("Name");
   });
 
   it("should filter out empty rows", () => {
     const mockData = [
       ["Name"],
-      ["Yuran"],
+      ["John"],
       [""], // 빈 문자열
-      ["Hyeonwoo"],
+      ["Jane"],
       [" "], // 공백만
     ];
 
     const result = parseEmployees(mockData);
 
-    expect(result).toEqual(["Yuran", "Hyeonwoo"]);
+    expect(result).toEqual(["John", "Jane"]);
   });
 
   it("should trim whitespace from names", () => {
-    const mockData = [["Name"], ["  Yuran  "], [" Hyeonwoo "]];
+    const mockData = [["Name"], ["  John  "], [" Jane "]];
 
     const result = parseEmployees(mockData);
 
-    expect(result).toEqual(["Yuran", "Hyeonwoo"]);
+    expect(result).toEqual(["John", "Jane"]);
   });
 
   it("should handle empty input", () => {
@@ -196,10 +196,10 @@ describe("parseScheduleSheet", () => {
         "2025-01-10",
         "2025-01-11",
       ],
-      ["*", "", "Hyeonwoo", "Min", "Ryan", "", "", ""],
+      ["*", "", "John", "Jane", "Alice", "", "", ""],
       ["", "", "", "", "", "", "", ""],
-      ["11:00", "Yuran", "K", "", "", "", "", ""],
-      ["", "Hyeonwoo", "B", "", "", "", "", ""],
+      ["11:00", "Bob", "K", "", "", "", "", ""],
+      ["", "Charlie", "B", "", "", "", "", ""],
       ["", "", "", "", "", "", "", ""],
       ["15:30", "Mina", "Ari", "", "", "", "", ""],
       ["", "Jenny", "Gahee", "", "", "", "", ""],
@@ -209,7 +209,7 @@ describe("parseScheduleSheet", () => {
 
     // All day shift entries
     expect(result).toContainEqual({
-      name: "Hyeonwoo",
+      name: "John",
       date: "2025-01-06",
       dayOfWeek: "Monday",
       shift: "*",
@@ -217,7 +217,7 @@ describe("parseScheduleSheet", () => {
     });
 
     expect(result).toContainEqual({
-      name: "Min",
+      name: "Jane",
       date: "2025-01-07",
       dayOfWeek: "Tuesday",
       shift: "*",
@@ -226,7 +226,7 @@ describe("parseScheduleSheet", () => {
 
     // Morning shift entries
     expect(result).toContainEqual({
-      name: "Yuran",
+      name: "Bob",
       date: "2025-01-05",
       dayOfWeek: "Sunday",
       shift: "11:00",
@@ -282,7 +282,7 @@ describe("parseScheduleSheet", () => {
         "2025-01-11",
       ],
       ["11:00", "", "", "Jenny(until 17:00)", "", "", "", ""],
-      ["15:30", "", "Minji(from 17:30)", "", "", "", "", ""],
+      ["15:30", "", "Alice(from 17:30)", "", "", "", "", ""],
     ];
 
     const result = parseScheduleSheet(mockData, location);
@@ -334,7 +334,7 @@ describe("parseScheduleSheet", () => {
         "2025-01-10",
         "2025-01-11",
       ],
-      ["*", "", "Hyeonwoo", "", "Ryan", "", "", ""],
+      ["*", "", "John", "", "Alice", "", "", ""],
       ["", "", "", "", "", "", "", ""],
       ["11:00", "", "", "", "", "", "", ""],
     ];

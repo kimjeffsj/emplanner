@@ -5,21 +5,21 @@ import { WeekSchedule, ScheduleEntry } from "@/types/schedule";
 describe("WeeklyGrid", () => {
   const mockEntries: ScheduleEntry[] = [
     {
-      name: "Jenny",
+      name: "Jane",
       date: "2024-01-14", // Sunday
       dayOfWeek: "Sunday",
       shift: "*",
       location: "No.3",
     },
     {
-      name: "Ryan",
+      name: "John",
       date: "2024-01-15", // Monday
       dayOfWeek: "Monday",
       shift: "11:00",
       location: "No.3",
     },
     {
-      name: "Minji",
+      name: "Alice",
       date: "2024-01-15", // Monday
       dayOfWeek: "Monday",
       shift: "15:30",
@@ -27,7 +27,7 @@ describe("WeeklyGrid", () => {
       note: { type: "from", time: "17:30" },
     },
     {
-      name: "Yuran",
+      name: "Bob",
       date: "2024-01-16", // Tuesday
       dayOfWeek: "Tuesday",
       shift: "*",
@@ -81,18 +81,18 @@ describe("WeeklyGrid", () => {
   describe("데이터 표시", () => {
     it("All day 시프트 직원을 해당 날짜 셀에 표시한다", () => {
       render(<WeeklyGrid schedule={mockWeekSchedule} />);
-      expect(screen.getByText("Jenny")).toBeInTheDocument();
-      expect(screen.getByText("Yuran")).toBeInTheDocument();
+      expect(screen.getByText("Jane")).toBeInTheDocument();
+      expect(screen.getByText("Bob")).toBeInTheDocument();
     });
 
     it("오전 시프트 직원을 해당 날짜 셀에 표시한다", () => {
       render(<WeeklyGrid schedule={mockWeekSchedule} />);
-      expect(screen.getByText("Ryan")).toBeInTheDocument();
+      expect(screen.getByText("John")).toBeInTheDocument();
     });
 
     it("오후 시프트 직원을 해당 날짜 셀에 표시한다", () => {
       render(<WeeklyGrid schedule={mockWeekSchedule} />);
-      expect(screen.getByText("Minji")).toBeInTheDocument();
+      expect(screen.getByText("Alice")).toBeInTheDocument();
     });
 
     it("from note가 있는 직원은 서브행에 표시된다", () => {
@@ -101,8 +101,8 @@ describe("WeeklyGrid", () => {
       // 서브행 헤더와 뱃지 인라인 두 곳에서 표시될 수 있음
       const timeNotes = screen.getAllByText("17:30~");
       expect(timeNotes.length).toBeGreaterThanOrEqual(1);
-      // 직원 이름은 여전히 표시됨
-      expect(screen.getByText("Minji")).toBeInTheDocument();
+      // 직원 이름은 버튼으로 표시됨
+      expect(screen.getByRole("button", { name: /Alice/ })).toBeInTheDocument();
     });
 
     it("until note가 있는 직원은 인라인으로 시간 표시", () => {
@@ -150,22 +150,22 @@ describe("WeeklyGrid", () => {
 
   describe("오늘 날짜 강조", () => {
     it("todayDate prop과 일치하는 컬럼에 오늘 표시가 있다", () => {
-      render(
-        <WeeklyGrid schedule={mockWeekSchedule} todayDate="2024-01-15" />
-      );
+      render(<WeeklyGrid schedule={mockWeekSchedule} todayDate="2024-01-15" />);
 
       // aria-label에 (오늘) 표시 확인
-      const todayColumn = screen.getByRole("columnheader", { name: /Mon 01\/15 \(오늘\)/ });
+      const todayColumn = screen.getByRole("columnheader", {
+        name: /Mon 01\/15 \(오늘\)/,
+      });
       expect(todayColumn).toBeInTheDocument();
     });
 
     it("todayDate가 주 범위에 없으면 오늘 표시가 없다", () => {
-      render(
-        <WeeklyGrid schedule={mockWeekSchedule} todayDate="2024-01-25" />
-      );
+      render(<WeeklyGrid schedule={mockWeekSchedule} todayDate="2024-01-25" />);
 
       // (오늘) 표시가 있는 컬럼이 없어야 함
-      const todayColumn = screen.queryByRole("columnheader", { name: /\(오늘\)/ });
+      const todayColumn = screen.queryByRole("columnheader", {
+        name: /\(오늘\)/,
+      });
       expect(todayColumn).not.toBeInTheDocument();
     });
 
@@ -173,7 +173,9 @@ describe("WeeklyGrid", () => {
       render(<WeeklyGrid schedule={mockWeekSchedule} />);
 
       // (오늘) 표시가 있는 컬럼이 없어야 함
-      const todayColumn = screen.queryByRole("columnheader", { name: /\(오늘\)/ });
+      const todayColumn = screen.queryByRole("columnheader", {
+        name: /\(오늘\)/,
+      });
       expect(todayColumn).not.toBeInTheDocument();
     });
   });
@@ -218,33 +220,39 @@ describe("WeeklyGrid", () => {
       );
 
       // 모든 직원이 표시되어야 함
-      expect(screen.getByText("Jenny")).toBeInTheDocument();
-      expect(screen.getByText("Ryan")).toBeInTheDocument();
-      expect(screen.getByText("Minji")).toBeInTheDocument();
-      expect(screen.getByText("Yuran")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Jane/ })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /John/ })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Alice/ })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Bob/ })).toBeInTheDocument();
     });
 
     it("selectedEmployee가 지정되면 해당 직원만 표시한다", () => {
       render(
-        <WeeklyGrid schedule={mockWeekSchedule} selectedEmployee="Ryan" />
+        <WeeklyGrid schedule={mockWeekSchedule} selectedEmployee="John" />
       );
 
-      // Ryan만 표시되어야 함
-      expect(screen.getByText("Ryan")).toBeInTheDocument();
+      // John만 표시되어야 함
+      expect(screen.getByRole("button", { name: /John/ })).toBeInTheDocument();
       // 다른 직원은 표시되지 않아야 함
-      expect(screen.queryByText("Jenny")).not.toBeInTheDocument();
-      expect(screen.queryByText("Minji")).not.toBeInTheDocument();
-      expect(screen.queryByText("Yuran")).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /Jane/ })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /Alice/ })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /Bob/ })
+      ).not.toBeInTheDocument();
     });
 
     it("selectedEmployee가 undefined이면 모든 직원을 표시한다", () => {
       render(<WeeklyGrid schedule={mockWeekSchedule} />);
 
-      // 모든 직원이 표시되어야 함
-      expect(screen.getByText("Jenny")).toBeInTheDocument();
-      expect(screen.getByText("Ryan")).toBeInTheDocument();
-      expect(screen.getByText("Minji")).toBeInTheDocument();
-      expect(screen.getByText("Yuran")).toBeInTheDocument();
+      // 모든 직원이 표시되어야 함 (버튼으로 렌더링됨)
+      expect(screen.getByRole("button", { name: /Jane/ })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /John/ })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Alice/ })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Bob/ })).toBeInTheDocument();
     });
 
     it("필터링된 직원의 모든 날짜 스케줄이 표시된다", () => {

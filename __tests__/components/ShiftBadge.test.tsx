@@ -3,17 +3,17 @@ import ShiftBadge from "@/components/ShiftBadge";
 
 describe("ShiftBadge", () => {
   describe("All day shift", () => {
-    it('should display "All day" for "*" shift type', () => {
+    it('should display "*" for "*" shift type', () => {
       render(<ShiftBadge shift="*" />);
 
-      const badge = screen.getByText("All day");
+      const badge = screen.getByText("*");
       expect(badge).toBeInTheDocument();
     });
 
     it('should have shift-badge class for "*" shift type', () => {
       render(<ShiftBadge shift="*" />);
 
-      const badge = screen.getByText("All day");
+      const badge = screen.getByText("*");
       expect(badge).toHaveClass("shift-badge");
     });
   });
@@ -49,5 +49,4 @@ describe("ShiftBadge", () => {
       expect(badge).toHaveClass("shift-badge");
     });
   });
-
 });
