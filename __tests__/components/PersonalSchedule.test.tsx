@@ -156,7 +156,7 @@ describe("PersonalSchedule", () => {
     it("각 엔트리의 시프트 타입을 표시한다", () => {
       render(<PersonalSchedule schedule={mockSchedule} />);
 
-      expect(screen.getAllByText("종일").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText("All day").length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText("11:00~")).toBeInTheDocument();
       expect(screen.getByText("15:30~")).toBeInTheDocument();
     });

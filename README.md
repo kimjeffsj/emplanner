@@ -69,7 +69,7 @@ Built for users aged 10s-60s with varying tech comfort levels:
 
 Started with TDD to ensure reliability:
 
-- **131 tests** covering components, utilities, and API routes
+- **148 tests** covering components, utilities, and API routes
 - Jest + React Testing Library for component behavior validation
 - Integration tests for Google Sheets parsing logic
 
@@ -84,7 +84,7 @@ Started with TDD to ensure reliability:
 | Styling     | Tailwind CSS v4 + shadcn/ui              |
 | Data Source | Google Sheets API                        |
 | Cache       | Vercel Postgres (via Prisma)             |
-| Testing     | Jest + React Testing Library (131 tests) |
+| Testing     | Jest + React Testing Library (148 tests) |
 | Deployment  | Vercel (free tier)                       |
 
 **Architecture Pattern**: JAMstack with ISR for near-real-time updates
@@ -104,7 +104,7 @@ Started with TDD to ensure reliability:
 ### Technical Achievements:
 
 - **$0/month** operating cost (Vercel free tier + Google Sheets)
-- **131 passing tests** ensuring code reliability
+- **145 passing tests** ensuring code reliability
 - **<1s page load** via static generation
 - **60s update latency** from Sheets to web
 - **PWA installable** as home screen app

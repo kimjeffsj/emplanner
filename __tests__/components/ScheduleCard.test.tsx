@@ -37,7 +37,7 @@ describe("ScheduleCard", () => {
   describe("ShiftBadge 렌더링", () => {
     it("All day 시프트를 표시한다", () => {
       render(<ScheduleCard entry={baseEntry} />);
-      expect(screen.getByText("종일")).toBeInTheDocument();
+      expect(screen.getByText("All day")).toBeInTheDocument();
     });
 
     it("오전 시프트(11:00)를 표시한다", () => {
