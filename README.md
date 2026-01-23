@@ -111,12 +111,22 @@ Started with TDD to ensure reliability:
 
 ---
 
-## 📸 Screenshots
+## 📸 From Whiteboard to Web App
 
-| Weekly Grid View                                       | Personal Schedule                                         |
-| ------------------------------------------------------ | --------------------------------------------------------- |
-| ![Grid View](docs/screenshot-grid.png)                 | ![Personal](docs/screenshot-personal.png)                 |
-| ![Grid View (Mobile)](docs/screenshot-grid-mobile.png) | ![Personal (Mobile)](docs/screenshot-personal-mobile.png) |
+### The Evolution
+
+| Before: Physical Whiteboard               | Manager View: Google Sheets        | After: Web App                   |
+| ----------------------------------------- | ---------------------------------- | -------------------------------- |
+| ![Whiteboard](docs/whiteboard-before.jpg) | ![Sheets](docs/sheets-example.png) | ![Web](docs/screenshot-grid.png) |
+| Must visit restaurant                     | Edit from anywhere                 | Employees access 24/7            |
+| Hard to read, limited space               | Familiar spreadsheet interface     | Mobile-optimized, filterable     |
+
+### Employee Experience
+
+| Desktop View                                   | Mobile View                                             |
+| ---------------------------------------------- | ------------------------------------------------------- |
+| ![Grid View](docs/screenshot-grid.png)         | ![Grid Mobile](docs/screenshot-grid-mobile.png)         |
+| ![Personal View](docs/screenshot-personal.png) | ![Personal Mobile](docs/screenshot-personal-mobile.png) |
 
 ---
 
