@@ -11,7 +11,7 @@ interface ScheduleCardProps {
 function getShiftLabel(shiftType: ShiftType): string {
   switch (shiftType) {
     case "*":
-      return "종일";
+      return "All day";
     case "11:00":
       return "11:00~";
     case "15:30":
@@ -33,11 +33,11 @@ export default function ScheduleCard({
 
   // Generate accessible label for the card
   const getAriaLabel = (): string => {
-    const shiftText = entry.shift === "*" ? "종일" : `${entry.shift}부터`;
+    const shiftText = entry.shift === "*" ? "종일" : `from ${entry.shift}`;
     const noteText = entry.note
       ? `, ${entry.note.type} ${entry.note.time}`
       : "";
-    const todayText = isToday ? " (오늘)" : "";
+    const todayText = isToday ? " (today)" : "";
     return `${formatDate(entry.date)} ${entry.dayOfWeek}${todayText}, ${entry.name}, ${shiftText} 근무${noteText}`;
   };
 
