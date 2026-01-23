@@ -4,7 +4,7 @@
 
 A read-only schedule viewer that uses Google Sheets as a CMS, enabling small business managers to update schedules without learning new software while employees access their shifts from anywhere.
 
-**Live Demo** | [GitHub](https://github.com/jeffseongjunkim/chicko-schedule)
+**[Live](https://emplanner.vercel.app/)** | [GitHub](https://github.com/jeffseongjunkim/chicko-schedule)
 
 ---
 
