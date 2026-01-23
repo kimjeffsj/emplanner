@@ -132,8 +132,6 @@ Started with TDD to ensure reliability:
 
 ## 🚀 Quick Start
 
-## 🚀 Quick Start
-
 ```bash
 # Clone and install
 git clone https://github.com/jeffseongjunkim/chicko-schedule.git
