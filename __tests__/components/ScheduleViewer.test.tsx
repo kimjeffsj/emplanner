@@ -15,6 +15,11 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
+// Mock getTodayDate to return a consistent date for testing
+jest.mock("@/components/TodayHighlight", () => ({
+  getTodayDate: () => "2024-01-15",
+}));
+
 describe("ScheduleViewer", () => {
   // Mock No.3 스케줄
   const mockNo3Entries: ScheduleEntry[] = [
@@ -64,7 +69,6 @@ describe("ScheduleViewer", () => {
     initialWestminsterSchedule: mockWestminsterSchedule,
     initialWeekStart: "2024-01-14",
     availableWeeks: ["2024-01-14", "2024-01-21", "2024-01-28"],
-    todayDate: "2024-01-15",
   };
 
   beforeEach(() => {
@@ -252,7 +256,7 @@ describe("ScheduleViewer", () => {
 
       // WeeklyGrid에서 오늘 날짜 aria-label 확인
       const todayColumn = screen.getByRole("columnheader", {
-        name: /Mon 01\/15 \(오늘\)/,
+        name: /Mon 01\/15 \(Today\)/,
       });
       expect(todayColumn).toBeInTheDocument();
     });

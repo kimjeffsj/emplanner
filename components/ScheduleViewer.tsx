@@ -8,6 +8,7 @@ import {
   WeekSchedule,
   EmployeeWeekSchedule,
 } from "@/types/schedule";
+import { getTodayDate } from "./TodayHighlight";
 import WeekNavigation from "./WeekNavigation";
 
 const EmployeeSearchBar = dynamic(() => import("./EmployeeSearchBar"), {
@@ -26,7 +27,6 @@ interface ScheduleViewerProps {
   initialWestminsterSchedule: WeekSchedule;
   initialWeekStart: string;
   availableWeeks: string[];
-  todayDate: string;
 }
 
 export default function ScheduleViewer({
@@ -34,8 +34,9 @@ export default function ScheduleViewer({
   initialWestminsterSchedule,
   initialWeekStart,
   availableWeeks,
-  todayDate,
 }: ScheduleViewerProps) {
+  // 클라이언트에서 오늘 날짜 계산 (사용자 로컬 타임존 기준)
+  const todayDate = getTodayDate();
   const searchParams = useSearchParams();
   const router = useRouter();
 

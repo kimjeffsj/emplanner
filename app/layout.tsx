@@ -4,6 +4,7 @@ import "./globals.css";
 import PWAInstallBanner from "@/components/PWAInstallBanner";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import IOSInstallPrompt from "@/components/IOSInstallPrompt";
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -54,6 +55,7 @@ export default function RootLayout({
         <PWAInstallBanner />
         <IOSInstallPrompt />
         <ServiceWorkerRegistration />
+        <Analytics />
       </body>
     </html>
   );

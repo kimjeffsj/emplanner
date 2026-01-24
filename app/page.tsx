@@ -9,12 +9,8 @@ import ThemeToggle from "@/components/ThemeToggle";
 export const revalidate = 60;
 
 export default async function Home() {
-  // 오늘 날짜 (YYYY-MM-DD) - 로컬 시간 기준
-  const now = new Date();
-  const todayDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-
-  // 현재 주 시작일 계산
-  const currentWeekStart = getWeekStart(now);
+  // 현재 주 시작일 계산 (서버에서 UTC 기준으로 계산)
+  const currentWeekStart = getWeekStart(new Date());
 
   // DB에서 사용 가능한 주차 목록 조회
   let availableWeeks: string[] = [];
@@ -95,7 +91,6 @@ export default async function Home() {
             initialWestminsterSchedule={westminsterSchedule}
             initialWeekStart={weekStart}
             availableWeeks={availableWeeks}
-            todayDate={todayDate}
           />
         </Suspense>
       </div>
