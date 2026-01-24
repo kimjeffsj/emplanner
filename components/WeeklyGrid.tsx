@@ -7,6 +7,7 @@ import {
   TimeNote,
 } from "@/types/schedule";
 import { cn } from "@/lib/utils";
+import { parseDate, formatDate } from "@/lib/date-utils";
 
 interface WeeklyGridProps {
   schedule: WeekSchedule;
@@ -36,7 +37,7 @@ export default function WeeklyGrid({
 }: WeeklyGridProps) {
   const weekDates = generateWeekDates(schedule.weekStart);
 
-  const formatDate = (dateStr: string): string => {
+  const formatDisplayDate = (dateStr: string): string => {
     const [, month, day] = dateStr.split("-");
     return `${month}/${day}`;
   };
@@ -85,7 +86,7 @@ export default function WeeklyGrid({
               <div
                 key={date}
                 role="columnheader"
-                aria-label={`${DAYS[index]} ${formatDate(date)}${isToday(date) ? " (오늘)" : ""}`}
+                aria-label={`${DAYS[index]} ${formatDisplayDate(date)}${isToday(date) ? " (Today)" : ""}`}
                 className={cn(
                   "flex flex-col items-center p-3 text-center transition-colors border-r border-zinc-200 dark:border-zinc-800 last:border-r-0",
                   // [DESIGN] 오늘 날짜 헤더: 다크모드에서 너무 쨍하지 않게 Zinc-800 + 채도 낮은 Blue 사용
@@ -110,7 +111,7 @@ export default function WeeklyGrid({
                       : "text-zinc-400 dark:text-zinc-500"
                   )}
                 >
-                  {formatDate(date)}
+                  {formatDisplayDate(date)}
                 </span>
               </div>
             ))}
@@ -235,7 +236,8 @@ function generateWeekDates(weekStart: string): string[] {
     startDate = new Date(today);
     startDate.setDate(today.getDate() - today.getDay());
   } else {
-    startDate = new Date(weekStart);
+    // parseDate를 사용하여 로컬 시간대 기준으로 파싱
+    startDate = parseDate(weekStart);
     if (isNaN(startDate.getTime())) {
       const today = new Date();
       startDate = new Date(today);
@@ -246,7 +248,8 @@ function generateWeekDates(weekStart: string): string[] {
   for (let i = 0; i < 7; i++) {
     const date = new Date(startDate);
     date.setDate(startDate.getDate() + i);
-    dates.push(date.toISOString().split("T")[0]);
+    // formatDate를 사용하여 로컬 시간대 기준으로 포맷팅
+    dates.push(formatDate(date));
   }
   return dates;
 }

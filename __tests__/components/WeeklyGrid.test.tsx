@@ -152,9 +152,9 @@ describe("WeeklyGrid", () => {
     it("todayDate prop과 일치하는 컬럼에 오늘 표시가 있다", () => {
       render(<WeeklyGrid schedule={mockWeekSchedule} todayDate="2024-01-15" />);
 
-      // aria-label에 (오늘) 표시 확인
+      // aria-label에 (Today) 표시 확인
       const todayColumn = screen.getByRole("columnheader", {
-        name: /Mon 01\/15 \(오늘\)/,
+        name: /Mon 01\/15 \(Today\)/,
       });
       expect(todayColumn).toBeInTheDocument();
     });
@@ -162,9 +162,9 @@ describe("WeeklyGrid", () => {
     it("todayDate가 주 범위에 없으면 오늘 표시가 없다", () => {
       render(<WeeklyGrid schedule={mockWeekSchedule} todayDate="2024-01-25" />);
 
-      // (오늘) 표시가 있는 컬럼이 없어야 함
+      // (Today) 표시가 있는 컬럼이 없어야 함
       const todayColumn = screen.queryByRole("columnheader", {
-        name: /\(오늘\)/,
+        name: /\(Today\)/,
       });
       expect(todayColumn).not.toBeInTheDocument();
     });
@@ -172,9 +172,9 @@ describe("WeeklyGrid", () => {
     it("todayDate가 없으면 오늘 표시가 없다", () => {
       render(<WeeklyGrid schedule={mockWeekSchedule} />);
 
-      // (오늘) 표시가 있는 컬럼이 없어야 함
+      // (Today) 표시가 있는 컬럼이 없어야 함
       const todayColumn = screen.queryByRole("columnheader", {
-        name: /\(오늘\)/,
+        name: /\(Today\)/,
       });
       expect(todayColumn).not.toBeInTheDocument();
     });

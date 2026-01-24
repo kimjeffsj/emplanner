@@ -104,7 +104,7 @@ Started with TDD to ensure reliability:
 ### Technical Achievements:
 
 - **$0/month** operating cost (Vercel free tier + Google Sheets)
-- **145 passing tests** ensuring code reliability
+- **148 tests** ensuring code reliability
 - **<1s page load** via static generation
 - **60s update latency** from Sheets to web
 - **PWA installable** as home screen app
@@ -156,7 +156,7 @@ Open [http://localhost:3000](http://localhost:3000)
 | `GOOGLE_PRIVATE_KEY`           | Service Account JSON key    |
 | `GOOGLE_SHEET_ID`              | Document ID from Sheets URL |
 
-See [full setup guide](docs/SETUP.md) for detailed Google Sheets API configuration.
+See [Google Sheets API documentation](https://developers.google.com/sheets/api/quickstart/nodejs) for detailed setup instructions.
 
 ---
 
@@ -202,7 +202,7 @@ npm run test:watch        # Watch mode
 npm run test:coverage     # Coverage report
 ```
 
-**131 tests** covering:
+**148 tests** covering:
 
 - Component rendering and interactions
 - Schedule parsing logic
