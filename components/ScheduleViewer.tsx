@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
@@ -46,6 +46,15 @@ export default function ScheduleViewer({
   const [westminsterSchedule, setWestminsterSchedule] = useState(initialWestminsterSchedule);
   const [isLoadingWeek, setIsLoadingWeek] = useState(false);
 
+  // 무한 루프 방지를 위한 ref
+  const isNavigatingRef = useRef(false);
+  const currentWeekRef = useRef(currentWeekStart); // 현재 주차 추적용 ref
+
+  // currentWeekStart 변경 시 ref도 업데이트
+  useEffect(() => {
+    currentWeekRef.current = currentWeekStart;
+  }, [currentWeekStart]);
+
   // 두 스케줄에서 직원 이름 추출 (중복 제거, 알파벳 순)
   const employeeNames = useMemo(() => {
     const namesSet = new Set<string>();
@@ -88,11 +97,12 @@ export default function ScheduleViewer({
     return currentIndex > 0; // 배열이 최신순이므로
   }, [currentWeekStart, availableWeeks]);
 
-  // 주간 변경 핸들러
+  // 주간 변경 핸들러 (currentWeekStart 의존성 제거하여 무한 루프 방지)
   const handleWeekChange = useCallback(async (newWeekStart: string) => {
     if (!availableWeeks.includes(newWeekStart)) return;
-    if (newWeekStart === currentWeekStart) return;
+    if (isNavigatingRef.current) return; // 이미 네비게이션 중이면 무시
 
+    isNavigatingRef.current = true;
     setIsLoadingWeek(true);
     try {
       const response = await fetch(`/api/schedule/${newWeekStart}`);
@@ -113,24 +123,28 @@ export default function ScheduleViewer({
       console.error("Failed to fetch schedule:", error);
     } finally {
       setIsLoadingWeek(false);
+      // 약간의 딜레이 후 플래그 해제 (URL 변경 이벤트가 처리된 후)
+      setTimeout(() => {
+        isNavigatingRef.current = false;
+      }, 100);
     }
-  }, [availableWeeks, currentWeekStart, searchParams, router]);
+  }, [availableWeeks, searchParams, router]);
 
-  // 이전 주로 이동
+  // 이전 주로 이동 (ref 사용하여 의존성 최소화)
   const handlePreviousWeek = useCallback(() => {
-    const currentIndex = availableWeeks.indexOf(currentWeekStart);
+    const currentIndex = availableWeeks.indexOf(currentWeekRef.current);
     if (currentIndex < availableWeeks.length - 1) {
       handleWeekChange(availableWeeks[currentIndex + 1]);
     }
-  }, [availableWeeks, currentWeekStart, handleWeekChange]);
+  }, [availableWeeks, handleWeekChange]);
 
-  // 다음 주로 이동
+  // 다음 주로 이동 (ref 사용하여 의존성 최소화)
   const handleNextWeek = useCallback(() => {
-    const currentIndex = availableWeeks.indexOf(currentWeekStart);
+    const currentIndex = availableWeeks.indexOf(currentWeekRef.current);
     if (currentIndex > 0) {
       handleWeekChange(availableWeeks[currentIndex - 1]);
     }
-  }, [availableWeeks, currentWeekStart, handleWeekChange]);
+  }, [availableWeeks, handleWeekChange]);
 
   // 각 로케이션별 필터된 스케줄 개수 계산 (선택된 직원이 있을 때만)
   const locationCounts = useMemo(() => {
@@ -225,12 +239,19 @@ export default function ScheduleViewer({
     } else if (!employeeFromUrl) {
       setSelectedEmployee(null);
     }
+  }, [searchParams, employeeNames]);
+
+  // 주간 URL 파라미터 변경 감지 (별도 effect로 분리하여 무한 루프 방지)
+  useEffect(() => {
+    // 네비게이션 중이면 무시 (버튼 클릭으로 인한 URL 변경)
+    if (isNavigatingRef.current) return;
 
     const weekFromUrl = searchParams.get("week");
     if (weekFromUrl && availableWeeks.includes(weekFromUrl) && weekFromUrl !== currentWeekStart) {
       handleWeekChange(weekFromUrl);
     }
-  }, [searchParams, employeeNames, availableWeeks, currentWeekStart, handleWeekChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, availableWeeks]); // currentWeekStart, handleWeekChange 제외하여 무한 루프 방지
 
   return (
     <div className="schedule-viewer">
