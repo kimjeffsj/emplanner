@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { getWeekSchedule } from "@/lib/google-sheets";
 import { getScheduleByWeek, getAvailableWeeks } from "@/lib/db/schedule";
-import { getWeekStart } from "@/lib/date-utils";
+import { getWeekStart, getAppDate } from "@/lib/date-utils";
 import ScheduleViewer from "@/components/ScheduleViewer";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -9,8 +9,8 @@ import ThemeToggle from "@/components/ThemeToggle";
 export const revalidate = 60;
 
 export default async function Home() {
-  // 현재 주 시작일 계산 (서버에서 UTC 기준으로 계산)
-  const currentWeekStart = getWeekStart(new Date());
+  // 현재 주 시작일 계산 (밴쿠버 시간대 기준)
+  const currentWeekStart = getWeekStart(getAppDate());
 
   // DB에서 사용 가능한 주차 목록 조회
   let availableWeeks: string[] = [];

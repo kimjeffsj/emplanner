@@ -1,7 +1,7 @@
 import prisma from "./client";
 import { getWeekSchedule } from "../google-sheets";
 import { upsertWeekSchedule, cleanupOldWeeks, updateCurrentWeekFlag } from "./schedule";
-import { getWeekStart, getThreeWeekRange } from "../date-utils";
+import { getWeekStart, getThreeWeekRange, getAppDate } from "../date-utils";
 import type { ScheduleEntry } from "@/types/schedule";
 
 /**
@@ -53,8 +53,8 @@ export async function syncCurrentWeekFromSheets(): Promise<SyncResult> {
     // DB에 저장
     const result = await upsertWeekSchedule(weekStart, allEntries);
 
-    // 현재 주 플래그 업데이트
-    const currentWeekStart = getWeekStart(new Date());
+    // 현재 주 플래그 업데이트 (밴쿠버 시간대 기준)
+    const currentWeekStart = getWeekStart(getAppDate());
     await updateCurrentWeekFlag(currentWeekStart);
 
     // 로그 기록
@@ -105,8 +105,8 @@ export async function weeklySync(): Promise<SyncResult> {
     // 2. 오래된 주 정리 (3주 이상)
     const deletedCount = await cleanupOldWeeks(3);
 
-    // 3. 현재 주 플래그 업데이트
-    const currentWeekStart = getWeekStart(new Date());
+    // 3. 현재 주 플래그 업데이트 (밴쿠버 시간대 기준)
+    const currentWeekStart = getWeekStart(getAppDate());
     await updateCurrentWeekFlag(currentWeekStart);
 
     // 로그 기록

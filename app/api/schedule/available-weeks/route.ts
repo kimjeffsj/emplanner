@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAvailableWeeks } from "@/lib/db/schedule";
-import { getWeekStart, getAdjacentWeeks } from "@/lib/date-utils";
+import { getWeekStart, getAdjacentWeeks, getAppDate } from "@/lib/date-utils";
 
 export const dynamic = "force-dynamic";
 
@@ -15,8 +15,8 @@ export async function GET() {
     // DB에서 저장된 주차 조회
     const dbWeeks = await getAvailableWeeks();
 
-    // 현재 주 정보
-    const currentWeekStart = getWeekStart(new Date());
+    // 현재 주 정보 (밴쿠버 시간대 기준)
+    const currentWeekStart = getWeekStart(getAppDate());
     const { previousWeek, nextWeek } = getAdjacentWeeks(currentWeekStart);
 
     return NextResponse.json({

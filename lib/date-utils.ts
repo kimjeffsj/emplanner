@@ -3,6 +3,39 @@
  * 일요일을 주의 시작으로 사용
  */
 
+// 앱에서 사용하는 시간대 (밴쿠버)
+const APP_TIMEZONE = "America/Vancouver";
+
+/**
+ * 현재 날짜를 앱 시간대(밴쿠버) 기준으로 반환
+ * 서버(UTC)에서 실행되어도 밴쿠버 시간 기준으로 계산
+ */
+export function getAppDate(): Date {
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: APP_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const dateStr = formatter.format(now); // "2025-01-24"
+  return new Date(dateStr + "T00:00:00");
+}
+
+/**
+ * 현재 날짜를 앱 시간대(밴쿠버) 기준 YYYY-MM-DD 문자열로 반환
+ */
+export function getAppDateString(): string {
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: APP_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  return formatter.format(now); // "2025-01-24"
+}
+
 /**
  * 주어진 날짜가 속한 주의 일요일 날짜를 반환
  * @param date - 기준 날짜
