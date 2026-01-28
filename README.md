@@ -243,6 +243,17 @@ Set the required environment variables in Vercel dashboard, then deploy.
 
 ---
 
+## ⏲ Cron Schedule (Vercel)
+
+Weekly sync runs via Vercel Cron at **UTC Friday 06:59**.
+
+Local time mapping:
+
+- **PST (UTC-8):** Thursday 22:59
+- **PDT (UTC-7):** Thursday 23:59
+
+---
+
 ## 📝 License
 
 MIT License
