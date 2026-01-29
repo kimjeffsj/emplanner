@@ -50,6 +50,9 @@ export default function ScheduleViewer({
   const isNavigatingRef = useRef(false);
   const currentWeekRef = useRef(currentWeekStart); // 현재 주차 추적용 ref
 
+  // 주차별 스케줄 캐시 (API 중복 호출 방지)
+  const weekCacheRef = useRef<Map<string, { no3: WeekSchedule; westminster: WeekSchedule }>>(new Map());
+
   // currentWeekStart 변경 시 ref도 업데이트
   useEffect(() => {
     currentWeekRef.current = currentWeekStart;
@@ -103,22 +106,56 @@ export default function ScheduleViewer({
     if (isNavigatingRef.current) return; // 이미 네비게이션 중이면 무시
 
     isNavigatingRef.current = true;
-    setIsLoadingWeek(true);
+
+    // URL 업데이트 헬퍼
+    const updateUrl = (weekStart: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (weekStart === initialWeekStart) {
+        params.delete("week");
+      } else {
+        params.set("week", weekStart);
+      }
+      const queryString = params.toString();
+      router.replace(queryString ? `?${queryString}` : "/", { scroll: false });
+    };
+
+    // 스케줄 상태 업데이트 헬퍼
+    const applySchedule = (no3: WeekSchedule, westminster: WeekSchedule) => {
+      setNo3Schedule(no3);
+      setWestminsterSchedule(westminster);
+      setCurrentWeekStart(newWeekStart);
+      updateUrl(newWeekStart);
+    };
+
     try {
+      // 1. 초기 주차로 돌아가는 경우 → initialData 재사용
+      if (newWeekStart === initialWeekStart) {
+        applySchedule(initialNo3Schedule, initialWestminsterSchedule);
+        return;
+      }
+
+      // 2. 캐시에 있으면 재사용 (API 호출 없음)
+      const cached = weekCacheRef.current.get(newWeekStart);
+      if (cached) {
+        applySchedule(cached.no3, cached.westminster);
+        return;
+      }
+
+      // 3. 캐시에 없으면 API 호출 후 캐싱
+      setIsLoadingWeek(true);
       const response = await fetch(`/api/schedule/${newWeekStart}`);
       if (!response.ok) {
         throw new Error("Failed to fetch schedule");
       }
       const data = await response.json();
 
-      setNo3Schedule(data.no3Schedule);
-      setWestminsterSchedule(data.westminsterSchedule);
-      setCurrentWeekStart(newWeekStart);
+      // 캐시에 저장
+      weekCacheRef.current.set(newWeekStart, {
+        no3: data.no3Schedule,
+        westminster: data.westminsterSchedule,
+      });
 
-      // URL 업데이트 (week 파라미터 추가)
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("week", newWeekStart);
-      router.replace(`?${params.toString()}`, { scroll: false });
+      applySchedule(data.no3Schedule, data.westminsterSchedule);
     } catch (error) {
       console.error("Failed to fetch schedule:", error);
     } finally {
@@ -128,7 +165,7 @@ export default function ScheduleViewer({
         isNavigatingRef.current = false;
       }, 100);
     }
-  }, [availableWeeks, searchParams, router]);
+  }, [availableWeeks, searchParams, router, initialWeekStart, initialNo3Schedule, initialWestminsterSchedule]);
 
   // 이전 주로 이동 (ref 사용하여 의존성 최소화)
   const handlePreviousWeek = useCallback(() => {
