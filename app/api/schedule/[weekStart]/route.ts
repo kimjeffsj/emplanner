@@ -58,32 +58,26 @@ export async function GET(
       // 시트의 주차가 요청된 주차와 일치하는지 확인
       const sheetWeekStart = no3Schedule.weekStart || westminsterSchedule.weekStart;
 
-      if (sheetWeekStart === weekStart) {
-        return NextResponse.json({
-          source: "sheets",
-          weekStart,
-          weekEnd: no3Schedule.weekEnd || westminsterSchedule.weekEnd,
-          no3Schedule,
-          westminsterSchedule,
-        });
+      if (sheetWeekStart !== weekStart) {
+        return NextResponse.json(
+          { error: `Schedule not found for week ${weekStart}` },
+          { status: 404 }
+        );
       }
+
+      return NextResponse.json({
+        source: "sheets",
+        weekStart,
+        weekEnd: no3Schedule.weekEnd || westminsterSchedule.weekEnd,
+        no3Schedule,
+        westminsterSchedule,
+      });
     } catch {
-      // Sheets 조회 실패 시 빈 스케줄 반환
+      return NextResponse.json(
+        { error: `Schedule not found for week ${weekStart}` },
+        { status: 404 }
+      );
     }
-
-    // 데이터 없음 → 빈 스케줄 반환 (404 대신)
-    const weekStartDate = new Date(weekStart + "T00:00:00");
-    const weekEndDate = new Date(weekStartDate);
-    weekEndDate.setDate(weekEndDate.getDate() + 6);
-    const weekEnd = `${weekEndDate.getFullYear()}-${String(weekEndDate.getMonth() + 1).padStart(2, "0")}-${String(weekEndDate.getDate()).padStart(2, "0")}`;
-
-    return NextResponse.json({
-      source: "empty",
-      weekStart,
-      weekEnd,
-      no3Schedule: { weekStart, weekEnd, location: "No.3", entries: [] },
-      westminsterSchedule: { weekStart, weekEnd, location: "Westminster", entries: [] },
-    });
   } catch (error) {
     console.error("Error fetching schedule:", error);
     return NextResponse.json(
