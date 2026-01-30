@@ -22,18 +22,17 @@ export default async function Home() {
 
   // 스케줄 데이터 조회 (항상 Google Sheets에서 가져옴, 15분마다 revalidate)
   let no3Schedule, westminsterSchedule;
-  let weekStart = currentWeekStart;
 
   try {
     [no3Schedule, westminsterSchedule] = await Promise.all([
       getWeekSchedule("No.3"),
       getWeekSchedule("Westminster"),
     ]);
-    weekStart = no3Schedule.weekStart || westminsterSchedule.weekStart || currentWeekStart;
 
-    // Sheets에서 가져온 주차를 availableWeeks에 추가 (없으면)
-    if (weekStart && !availableWeeks.includes(weekStart)) {
-      availableWeeks = [weekStart, ...availableWeeks];
+    // Google Sheets에서 가져온 주차를 availableWeeks에 추가 (없으면)
+    const sheetsWeekStart = no3Schedule.weekStart || westminsterSchedule.weekStart;
+    if (sheetsWeekStart && !availableWeeks.includes(sheetsWeekStart)) {
+      availableWeeks = [sheetsWeekStart, ...availableWeeks];
     }
   } catch (error) {
     console.error("Failed to fetch from Google Sheets:", error);
@@ -54,7 +53,12 @@ export default async function Home() {
 
   // availableWeeks가 비어있으면 현재 주 추가
   if (availableWeeks.length === 0) {
-    availableWeeks = [weekStart];
+    availableWeeks = [currentWeekStart];
+  }
+
+  // 현재 주가 availableWeeks에 없으면 추가 (항상 현재 주로 네비게이션 가능하도록)
+  if (!availableWeeks.includes(currentWeekStart)) {
+    availableWeeks = [currentWeekStart, ...availableWeeks].sort();
   }
 
   return (
@@ -78,7 +82,7 @@ export default async function Home() {
           <ScheduleViewer
             initialNo3Schedule={no3Schedule}
             initialWestminsterSchedule={westminsterSchedule}
-            initialWeekStart={weekStart}
+            initialWeekStart={currentWeekStart}
             availableWeeks={availableWeeks}
           />
         </Suspense>
