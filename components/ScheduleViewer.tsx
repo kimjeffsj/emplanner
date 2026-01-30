@@ -100,20 +100,32 @@ export default function ScheduleViewer({
     return Boolean(no3Week && westminsterWeek && no3Week !== westminsterWeek);
   }, [no3Schedule.weekStart, westminsterSchedule.weekStart]);
 
-  // 주간 네비게이션 가능 여부 계산
+  // 주간 네비게이션 가능 여부 계산 (날짜 기반: 과거 4주, 미래 1주)
   const canNavigatePrevious = useMemo(() => {
-    const currentIndex = availableWeeks.indexOf(currentWeekStart);
-    return currentIndex < availableWeeks.length - 1; // 배열이 최신순이므로
-  }, [currentWeekStart, availableWeeks]);
+    const current = new Date(currentWeekStart + "T00:00:00");
+    const oldest = new Date(initialWeekStart + "T00:00:00");
+    oldest.setDate(oldest.getDate() - 28); // 4주 전까지
+    return current > oldest;
+  }, [currentWeekStart, initialWeekStart]);
 
   const canNavigateNext = useMemo(() => {
-    const currentIndex = availableWeeks.indexOf(currentWeekStart);
-    return currentIndex > 0; // 배열이 최신순이므로
-  }, [currentWeekStart, availableWeeks]);
+    const current = new Date(currentWeekStart + "T00:00:00");
+    const newest = new Date(initialWeekStart + "T00:00:00");
+    newest.setDate(newest.getDate() + 7); // 1주 후까지
+    return current < newest;
+  }, [currentWeekStart, initialWeekStart]);
+
+  // 빈 스케줄 생성 헬퍼
+  const createEmptySchedule = useCallback((weekStart: string, location: "No.3" | "Westminster"): WeekSchedule => {
+    const startDate = new Date(weekStart + "T00:00:00");
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 6);
+    const weekEnd = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, "0")}-${String(endDate.getDate()).padStart(2, "0")}`;
+    return { weekStart, weekEnd, location, entries: [] };
+  }, []);
 
   // 주간 변경 핸들러 (currentWeekStart 의존성 제거하여 무한 루프 방지)
   const handleWeekChange = useCallback(async (newWeekStart: string) => {
-    if (!availableWeeks.includes(newWeekStart)) return;
     if (isNavigatingRef.current) return; // 이미 네비게이션 중이면 무시
 
     isNavigatingRef.current = true;
@@ -155,20 +167,23 @@ export default function ScheduleViewer({
       // 3. 캐시에 없으면 API 호출 후 캐싱
       setIsLoadingWeek(true);
       const response = await fetch(`/api/schedule/${newWeekStart}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch schedule");
-      }
       const data = await response.json();
 
-      // 캐시에 저장
-      weekCacheRef.current.set(newWeekStart, {
-        no3: data.no3Schedule,
-        westminster: data.westminsterSchedule,
-      });
+      // API 에러 또는 데이터 없음 → 빈 스케줄 사용
+      const no3 = data.no3Schedule || createEmptySchedule(newWeekStart, "No.3");
+      const westminster = data.westminsterSchedule || createEmptySchedule(newWeekStart, "Westminster");
 
-      applySchedule(data.no3Schedule, data.westminsterSchedule);
+      // 캐시에 저장
+      weekCacheRef.current.set(newWeekStart, { no3, westminster });
+
+      applySchedule(no3, westminster);
     } catch (error) {
       console.error("Failed to fetch schedule:", error);
+      // 에러 시에도 빈 스케줄로 이동 (UX 유지)
+      const no3 = createEmptySchedule(newWeekStart, "No.3");
+      const westminster = createEmptySchedule(newWeekStart, "Westminster");
+      weekCacheRef.current.set(newWeekStart, { no3, westminster });
+      applySchedule(no3, westminster);
     } finally {
       setIsLoadingWeek(false);
       // 약간의 딜레이 후 플래그 해제 (URL 변경 이벤트가 처리된 후)
@@ -176,23 +191,23 @@ export default function ScheduleViewer({
         isNavigatingRef.current = false;
       }, 100);
     }
-  }, [availableWeeks, searchParams, router, initialWeekStart, initialNo3Schedule, initialWestminsterSchedule]);
+  }, [searchParams, router, initialWeekStart, initialNo3Schedule, initialWestminsterSchedule, createEmptySchedule]);
 
-  // 이전 주로 이동 (ref 사용하여 의존성 최소화)
+  // 이전 주로 이동 (7일 단위)
   const handlePreviousWeek = useCallback(() => {
-    const currentIndex = availableWeeks.indexOf(currentWeekRef.current);
-    if (currentIndex < availableWeeks.length - 1) {
-      handleWeekChange(availableWeeks[currentIndex + 1]);
-    }
-  }, [availableWeeks, handleWeekChange]);
+    const current = new Date(currentWeekRef.current + "T00:00:00");
+    current.setDate(current.getDate() - 7);
+    const prevWeek = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, "0")}-${String(current.getDate()).padStart(2, "0")}`;
+    handleWeekChange(prevWeek);
+  }, [handleWeekChange]);
 
-  // 다음 주로 이동 (ref 사용하여 의존성 최소화)
+  // 다음 주로 이동 (7일 단위)
   const handleNextWeek = useCallback(() => {
-    const currentIndex = availableWeeks.indexOf(currentWeekRef.current);
-    if (currentIndex > 0) {
-      handleWeekChange(availableWeeks[currentIndex - 1]);
-    }
-  }, [availableWeeks, handleWeekChange]);
+    const current = new Date(currentWeekRef.current + "T00:00:00");
+    current.setDate(current.getDate() + 7);
+    const nextWeek = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, "0")}-${String(current.getDate()).padStart(2, "0")}`;
+    handleWeekChange(nextWeek);
+  }, [handleWeekChange]);
 
   // 각 로케이션별 필터된 스케줄 개수 계산 (선택된 직원이 있을 때만)
   const locationCounts = useMemo(() => {
@@ -325,6 +340,15 @@ export default function ScheduleViewer({
           onChange={handleEmployeeChange}
         />
       </div>
+
+      {/* 빈 스케줄 안내 메시지 */}
+      {!isLoadingWeek && currentSchedule.entries.length === 0 && (
+        <div className="mb-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+          <p className="text-sm text-amber-700 dark:text-amber-300 text-center">
+            이 주의 스케줄이 아직 등록되지 않았습니다.
+          </p>
+        </div>
+      )}
 
       {/* 주간 그리드 (선택된 직원 하이라이트) */}
       {isLoadingWeek ? (
