@@ -89,6 +89,17 @@ export default function ScheduleViewer({
   const currentSchedule =
     selectedLocation === "No.3" ? no3Schedule : westminsterSchedule;
 
+  // 현재 선택된 로케이션의 실제 weekStart (시트에서 가져온 값)
+  const currentScheduleWeekStart = currentSchedule.weekStart || currentWeekStart;
+
+  // 두 로케이션의 주차가 다른지 확인 (경고 표시용)
+  const hasWeekMismatch = useMemo(() => {
+    const no3Week = no3Schedule.weekStart;
+    const westminsterWeek = westminsterSchedule.weekStart;
+    // 둘 다 있고 다른 경우에만 경고
+    return Boolean(no3Week && westminsterWeek && no3Week !== westminsterWeek);
+  }, [no3Schedule.weekStart, westminsterSchedule.weekStart]);
+
   // 주간 네비게이션 가능 여부 계산
   const canNavigatePrevious = useMemo(() => {
     const currentIndex = availableWeeks.indexOf(currentWeekStart);
@@ -300,12 +311,13 @@ export default function ScheduleViewer({
           counts={locationCounts}
         />
         <WeekNavigation
-          weekStart={currentWeekStart}
+          weekStart={currentScheduleWeekStart}
           onPreviousWeek={handlePreviousWeek}
           onNextWeek={handleNextWeek}
           canNavigatePrevious={canNavigatePrevious}
           canNavigateNext={canNavigateNext}
           isLoading={isLoadingWeek}
+          hasWeekMismatch={hasWeekMismatch}
         />
         <EmployeeSearchBar
           employees={employeeNames}

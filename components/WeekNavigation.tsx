@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Calendar, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Loader2, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface WeekNavigationProps {
@@ -10,6 +10,7 @@ interface WeekNavigationProps {
   canNavigatePrevious?: boolean;
   canNavigateNext?: boolean;
   isLoading?: boolean;
+  hasWeekMismatch?: boolean;
 }
 
 export default function WeekNavigation({
@@ -19,6 +20,7 @@ export default function WeekNavigation({
   canNavigatePrevious = true,
   canNavigateNext = true,
   isLoading = false,
+  hasWeekMismatch = false,
 }: WeekNavigationProps) {
   const getWeekRange = () => {
     // UTC 대신 로컬 시간으로 파싱하기 위해 T00:00:00 추가
@@ -52,6 +54,10 @@ export default function WeekNavigation({
       <div className="flex items-center gap-2 px-3 min-w-[180px] justify-center">
         {isLoading ? (
           <Loader2 className="w-4 h-4 text-zinc-500 animate-spin" />
+        ) : hasWeekMismatch ? (
+          <span title="두 매장의 스케줄 주차가 다릅니다">
+            <AlertTriangle className="w-4 h-4 text-amber-500" />
+          </span>
         ) : (
           <Calendar className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
         )}

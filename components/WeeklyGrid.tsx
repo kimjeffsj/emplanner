@@ -36,6 +36,7 @@ export default function WeeklyGrid({
   onEmployeeClick,
 }: WeeklyGridProps) {
   const weekDates = generateWeekDates(schedule.weekStart);
+  const isEmpty = schedule.entries.length === 0;
 
   const formatDisplayDate = (dateStr: string): string => {
     const [, month, day] = dateStr.split("-");
