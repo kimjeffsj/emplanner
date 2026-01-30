@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { getWeekSchedule } from "@/lib/google-sheets";
 import { getAvailableWeeks } from "@/lib/db/schedule";
-import { getWeekStart, getAppDate } from "@/lib/date-utils";
+import { getWeekStart, getWeekEnd, getAppDate } from "@/lib/date-utils";
 import ScheduleViewer from "@/components/ScheduleViewer";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -29,9 +29,31 @@ export default async function Home() {
       getWeekSchedule("Westminster"),
     ]);
 
-    // Google Sheets에서 가져온 주차를 availableWeeks에 추가 (없으면)
+    // Google Sheets에서 가져온 주차 확인
     const sheetsWeekStart = no3Schedule.weekStart || westminsterSchedule.weekStart;
-    if (sheetsWeekStart && !availableWeeks.includes(sheetsWeekStart)) {
+
+    // 시트의 주간이 현재 주보다 미래인 경우 → 현재 주 빈 스케줄로 표시
+    if (sheetsWeekStart && sheetsWeekStart > currentWeekStart) {
+      // 시트 주간은 availableWeeks에 추가 (네비게이션용)
+      if (!availableWeeks.includes(sheetsWeekStart)) {
+        availableWeeks = [sheetsWeekStart, ...availableWeeks];
+      }
+      // 현재 주 빈 스케줄로 초기화
+      const currentWeekEnd = getWeekEnd(getAppDate());
+      no3Schedule = {
+        weekStart: currentWeekStart,
+        weekEnd: currentWeekEnd,
+        location: "No.3" as const,
+        entries: [],
+      };
+      westminsterSchedule = {
+        weekStart: currentWeekStart,
+        weekEnd: currentWeekEnd,
+        location: "Westminster" as const,
+        entries: [],
+      };
+    } else if (sheetsWeekStart && !availableWeeks.includes(sheetsWeekStart)) {
+      // 시트가 현재 주 또는 과거 → 시트 데이터 사용, availableWeeks에 추가
       availableWeeks = [sheetsWeekStart, ...availableWeeks];
     }
   } catch (error) {
