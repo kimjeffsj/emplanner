@@ -107,11 +107,13 @@ export default function ScheduleViewer({
   // 주간 네비게이션 가능 여부 계산
   const canNavigatePrevious = useMemo(() => {
     const currentIndex = availableWeeks.indexOf(currentWeekStart);
+    if (currentIndex === -1) return false; // 배열에 없으면 비활성화
     return currentIndex < availableWeeks.length - 1; // 배열이 최신순이므로
   }, [currentWeekStart, availableWeeks]);
 
   const canNavigateNext = useMemo(() => {
     const currentIndex = availableWeeks.indexOf(currentWeekStart);
+    if (currentIndex === -1) return false; // 배열에 없으면 비활성화
     return currentIndex > 0; // 배열이 최신순이므로
   }, [currentWeekStart, availableWeeks]);
 
