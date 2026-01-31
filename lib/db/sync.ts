@@ -2,6 +2,7 @@ import prisma from "./client";
 import { getWeekSchedule } from "../google-sheets";
 import { upsertWeekSchedule, cleanupOldWeeks, updateCurrentWeekFlag } from "./schedule";
 import { getWeekStart, getThreeWeekRange, getAppDate } from "../date-utils";
+import { consolidateToAllDay } from "../schedule-parser";
 import type { ScheduleEntry } from "@/types/schedule";
 
 /**
@@ -50,8 +51,11 @@ export async function syncCurrentWeekFromSheets(): Promise<SyncResult> {
       ...westminsterSchedule.entries,
     ];
 
+    // 11:00 + 15:30 둘 다 있는 직원 → All day로 병합
+    const consolidatedEntries = consolidateToAllDay(allEntries);
+
     // DB에 저장
-    const result = await upsertWeekSchedule(weekStart, allEntries);
+    const result = await upsertWeekSchedule(weekStart, consolidatedEntries);
 
     // 현재 주 플래그 업데이트 (밴쿠버 시간대 기준)
     const currentWeekStart = getWeekStart(getAppDate());
@@ -175,8 +179,11 @@ export async function syncSpecificWeek(weekStart: string): Promise<SyncResult> {
       ...westminsterSchedule.entries,
     ];
 
+    // 11:00 + 15:30 둘 다 있는 직원 → All day로 병합
+    const consolidatedEntries = consolidateToAllDay(allEntries);
+
     // DB에 저장
-    const result = await upsertWeekSchedule(weekStart, allEntries);
+    const result = await upsertWeekSchedule(weekStart, consolidatedEntries);
 
     await logSync("incremental", "success", `Synced specific week ${weekStart}`, result.entriesCount, Date.now() - startTime);
 
