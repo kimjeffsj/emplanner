@@ -93,7 +93,7 @@ export default async function Home() {
           <ScheduleViewer
             initialNo3Schedule={no3Schedule}
             initialWestminsterSchedule={westminsterSchedule}
-            initialWeekStart={currentWeekStart}
+            initialWeekStart={targetWeek}
             availableWeeks={availableWeeks}
             initialSyncedAt={syncedAt?.toISOString() || null}
           />
