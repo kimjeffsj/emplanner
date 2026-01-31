@@ -34,7 +34,7 @@ Commercial scheduling apps (When I Work, 7shifts, Deputy) were rejected because:
 **What if Google Sheets became the admin interface, and a simple website became the employee view?**
 
 ```
-Google Sheets (Manager edits) → Next.js ISR (Processing) → Static Site (Employee view)
+Google Sheets (Manager edits) → Cron Sync (15min) → PostgreSQL → Next.js (Employee view)
 ```
 
 - **For managers**: Continue using a spreadsheet format with zero learning curve
@@ -50,8 +50,8 @@ Google Sheets (Manager edits) → Next.js ISR (Processing) → Static Site (Empl
 | Decision                | Rationale                                                                              |
 | ----------------------- | -------------------------------------------------------------------------------------- |
 | Google Sheets as CMS    | Parents already familiar with spreadsheet thinking (rows = time slots, columns = days) |
-| Read-only architecture  | No database, no auth, no CRUD complexity—just fast static pages                        |
-| ISR with 60s revalidate | Real-time updates without manual deployment                                            |
+| DB-backed with cron     | PostgreSQL cache synced every 15min from Sheets for reliable data access               |
+| Read-only architecture  | No auth, no CRUD complexity—just fast pages served from DB                             |
 
 ### 2. Accessibility First
 
@@ -82,12 +82,13 @@ Started with TDD to ensure reliability:
 | Framework   | Next.js 16 (App Router, ISR)             |
 | Language    | TypeScript                               |
 | Styling     | Tailwind CSS v4 + shadcn/ui              |
-| Data Source | Google Sheets API                        |
-| Cache       | Vercel Postgres (via Prisma)             |
+| Data Source | Google Sheets API → PostgreSQL           |
+| Database    | Vercel Postgres (via Prisma)             |
+| Sync        | cron-job.org (every 15 minutes)          |
 | Testing     | Jest + React Testing Library (148 tests) |
 | Deployment  | Vercel (free tier)                       |
 
-**Architecture Pattern**: JAMstack with ISR for near-real-time updates
+**Architecture Pattern**: DB-first with external cron sync from Google Sheets
 
 ---
 
@@ -106,7 +107,7 @@ Started with TDD to ensure reliability:
 - **$0/month** operating cost (Vercel free tier + Google Sheets)
 - **148 tests** ensuring code reliability
 - **<1s page load** via static generation
-- **60s update latency** from Sheets to web
+- **15min sync cycle** from Sheets to DB via cron
 - **PWA installable** as home screen app
 
 ---
@@ -150,11 +151,13 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ### Environment Variables Required
 
-| Variable                       | Description                 |
-| ------------------------------ | --------------------------- |
-| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | GCP Service Account email   |
-| `GOOGLE_PRIVATE_KEY`           | Service Account JSON key    |
-| `GOOGLE_SHEET_ID`              | Document ID from Sheets URL |
+| Variable                       | Description                      |
+| ------------------------------ | -------------------------------- |
+| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | GCP Service Account email        |
+| `GOOGLE_PRIVATE_KEY`           | Service Account JSON key         |
+| `GOOGLE_SHEET_ID`              | Document ID from Sheets URL      |
+| `POSTGRES_URL`                 | PostgreSQL connection string     |
+| `CRON_SECRET`                  | Secret for cron endpoint auth    |
 
 See [Google Sheets API documentation](https://developers.google.com/sheets/api/quickstart/nodejs) for detailed setup instructions.
 
@@ -243,14 +246,18 @@ Set the required environment variables in Vercel dashboard, then deploy.
 
 ---
 
-## ⏲ Cron Schedule (Vercel)
+## ⏲ Cron Schedule
 
-Weekly sync runs via Vercel Cron at **UTC Friday 06:59**.
+Schedule sync runs via **cron-job.org** every **15 minutes**.
 
-Local time mapping:
+| Setting | Value |
+| ------- | ----- |
+| URL | `https://emplanner.vercel.app/api/cron/weekly-sync` |
+| Method | GET |
+| Interval | Every 15 minutes |
+| Auth | `Authorization: Bearer {CRON_SECRET}` |
 
-- **PST (UTC-8):** Thursday 22:59
-- **PDT (UTC-7):** Thursday 23:59
+The cron job fetches the latest schedule from Google Sheets and updates the PostgreSQL database.
 
 ---
 

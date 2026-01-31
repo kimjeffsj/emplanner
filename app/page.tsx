@@ -21,6 +21,7 @@ export default async function Home() {
 
   // DB에서 스케줄 데이터 조회
   let no3Schedule, westminsterSchedule;
+  let syncedAt: Date | null = null;
 
   // 현재 주 또는 가장 최근 주차 사용
   const targetWeek = availableWeeks.includes(currentWeekStart)
@@ -33,6 +34,7 @@ export default async function Home() {
     if (dbSchedule) {
       no3Schedule = dbSchedule.no3Schedule;
       westminsterSchedule = dbSchedule.westminsterSchedule;
+      syncedAt = dbSchedule.syncedAt;
     } else {
       // DB에 데이터 없음 - 빈 스케줄
       no3Schedule = {
@@ -93,6 +95,7 @@ export default async function Home() {
             initialWestminsterSchedule={westminsterSchedule}
             initialWeekStart={currentWeekStart}
             availableWeeks={availableWeeks}
+            initialSyncedAt={syncedAt?.toISOString() || null}
           />
         </Suspense>
       </div>

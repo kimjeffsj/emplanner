@@ -45,6 +45,7 @@ export async function GET(
         weekEnd: dbSchedule.no3Schedule.weekEnd,
         no3Schedule: dbSchedule.no3Schedule,
         westminsterSchedule: dbSchedule.westminsterSchedule,
+        syncedAt: dbSchedule.syncedAt?.toISOString() || null,
       });
     }
 
@@ -71,6 +72,7 @@ export async function GET(
         weekEnd: no3Schedule.weekEnd || westminsterSchedule.weekEnd,
         no3Schedule,
         westminsterSchedule,
+        syncedAt: null,
       });
     } catch {
       return NextResponse.json(

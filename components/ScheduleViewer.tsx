@@ -9,6 +9,7 @@ import {
   EmployeeWeekSchedule,
 } from "@/types/schedule";
 import { getTodayDate } from "./TodayHighlight";
+import { formatToVancouverDateTime } from "@/lib/date-utils";
 import WeekNavigation from "./WeekNavigation";
 
 const EmployeeSearchBar = dynamic(() => import("./EmployeeSearchBar"), {
@@ -27,6 +28,7 @@ interface ScheduleViewerProps {
   initialWestminsterSchedule: WeekSchedule;
   initialWeekStart: string;
   availableWeeks: string[];
+  initialSyncedAt: string | null;
 }
 
 export default function ScheduleViewer({
@@ -34,6 +36,7 @@ export default function ScheduleViewer({
   initialWestminsterSchedule,
   initialWeekStart,
   availableWeeks,
+  initialSyncedAt,
 }: ScheduleViewerProps) {
   // 클라이언트에서 오늘 날짜 계산 (사용자 로컬 타임존 기준)
   const todayDate = getTodayDate();
@@ -45,13 +48,14 @@ export default function ScheduleViewer({
   const [no3Schedule, setNo3Schedule] = useState(initialNo3Schedule);
   const [westminsterSchedule, setWestminsterSchedule] = useState(initialWestminsterSchedule);
   const [isLoadingWeek, setIsLoadingWeek] = useState(false);
+  const [syncedAt, setSyncedAt] = useState<string | null>(initialSyncedAt);
 
   // 무한 루프 방지를 위한 ref
   const isNavigatingRef = useRef(false);
   const currentWeekRef = useRef(currentWeekStart); // 현재 주차 추적용 ref
 
   // 주차별 스케줄 캐시 (API 중복 호출 방지)
-  const weekCacheRef = useRef<Map<string, { no3: WeekSchedule; westminster: WeekSchedule }>>(new Map());
+  const weekCacheRef = useRef<Map<string, { no3: WeekSchedule; westminster: WeekSchedule; syncedAt: string | null }>>(new Map());
 
   // currentWeekStart 변경 시 ref도 업데이트
   useEffect(() => {
@@ -142,6 +146,7 @@ export default function ScheduleViewer({
       // 1. 초기 주차로 돌아가는 경우 → initialData 재사용
       if (newWeekStart === initialWeekStart) {
         applySchedule(initialNo3Schedule, initialWestminsterSchedule);
+        setSyncedAt(initialSyncedAt);
         return;
       }
 
@@ -149,6 +154,7 @@ export default function ScheduleViewer({
       const cached = weekCacheRef.current.get(newWeekStart);
       if (cached) {
         applySchedule(cached.no3, cached.westminster);
+        setSyncedAt(cached.syncedAt);
         return;
       }
 
@@ -164,9 +170,11 @@ export default function ScheduleViewer({
       weekCacheRef.current.set(newWeekStart, {
         no3: data.no3Schedule,
         westminster: data.westminsterSchedule,
+        syncedAt: data.syncedAt,
       });
 
       applySchedule(data.no3Schedule, data.westminsterSchedule);
+      setSyncedAt(data.syncedAt);
     } catch (error) {
       console.error("Failed to fetch schedule:", error);
     } finally {
@@ -176,7 +184,7 @@ export default function ScheduleViewer({
         isNavigatingRef.current = false;
       }, 100);
     }
-  }, [availableWeeks, searchParams, router, initialWeekStart, initialNo3Schedule, initialWestminsterSchedule]);
+  }, [availableWeeks, searchParams, router, initialWeekStart, initialNo3Schedule, initialWestminsterSchedule, initialSyncedAt]);
 
   // 이전 주로 이동 (ref 사용하여 의존성 최소화)
   const handlePreviousWeek = useCallback(() => {
@@ -345,6 +353,13 @@ export default function ScheduleViewer({
         isOpen={isModalOpen}
         onClose={handleModalClose}
       />
+
+      {/* Updated at 타임스탬프 */}
+      {syncedAt && (
+        <div className="text-xs text-gray-400 dark:text-gray-500 text-right mt-4">
+          Updated: {formatToVancouverDateTime(new Date(syncedAt))}
+        </div>
+      )}
     </div>
   );
 }

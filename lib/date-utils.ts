@@ -152,3 +152,19 @@ export function getWeekDifference(date1: string, date2: string): number {
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   return Math.floor(diffDays / 7);
 }
+
+/**
+ * UTC Date를 밴쿠버 시간대로 포맷팅 (날짜 + 시간)
+ * @param date - UTC Date 객체
+ * @returns 포맷된 문자열 (예: "Jan 30, 3:45 PM")
+ */
+export function formatToVancouverDateTime(date: Date): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: APP_TIMEZONE,
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  }).format(date);
+}

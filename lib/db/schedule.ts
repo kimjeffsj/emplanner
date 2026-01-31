@@ -5,11 +5,12 @@ import { getWeekEnd } from "../date-utils";
 /**
  * 특정 주의 스케줄 조회
  * @param weekStart - 주 시작일 (YYYY-MM-DD, 일요일)
- * @returns 양쪽 로케이션의 WeekSchedule 또는 null
+ * @returns 양쪽 로케이션의 WeekSchedule + syncedAt 또는 null
  */
 export async function getScheduleByWeek(weekStart: string): Promise<{
   no3Schedule: WeekSchedule;
   westminsterSchedule: WeekSchedule;
+  syncedAt: Date | null;
 } | null> {
   const weekDate = new Date(weekStart);
 
@@ -50,6 +51,7 @@ export async function getScheduleByWeek(weekStart: string): Promise<{
       location: "Westminster",
       entries: westminsterEntries,
     },
+    syncedAt: week.syncedAt,
   };
 }
 
