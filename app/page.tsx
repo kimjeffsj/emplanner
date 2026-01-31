@@ -1,12 +1,11 @@
 import { Suspense } from "react";
-import { getWeekSchedule } from "@/lib/google-sheets";
-import { getAvailableWeeks } from "@/lib/db/schedule";
-import { getWeekStart, getAppDate } from "@/lib/date-utils";
+import { getAvailableWeeks, getScheduleByWeek } from "@/lib/db/schedule";
+import { getWeekStart, getAppDate, getWeekEnd } from "@/lib/date-utils";
 import ScheduleViewer from "@/components/ScheduleViewer";
 import ThemeToggle from "@/components/ThemeToggle";
 
-// ISR: 15분마다 revalidate (Google Sheets 실시간 반영)
-export const revalidate = 900;
+// ISR: 5분마다 revalidate (DB에서 조회, cron이 15분마다 동기화)
+export const revalidate = 300;
 
 export default async function Home() {
   // 현재 주 시작일 계산 (밴쿠버 시간대 기준)
@@ -20,32 +19,47 @@ export default async function Home() {
     console.error("Failed to get available weeks from DB:", error);
   }
 
-  // 스케줄 데이터 조회 (항상 Google Sheets에서 가져옴, 15분마다 revalidate)
+  // DB에서 스케줄 데이터 조회
   let no3Schedule, westminsterSchedule;
 
-  try {
-    [no3Schedule, westminsterSchedule] = await Promise.all([
-      getWeekSchedule("No.3"),
-      getWeekSchedule("Westminster"),
-    ]);
+  // 현재 주 또는 가장 최근 주차 사용
+  const targetWeek = availableWeeks.includes(currentWeekStart)
+    ? currentWeekStart
+    : availableWeeks[0] || currentWeekStart;
 
-    // Google Sheets에서 가져온 주차를 availableWeeks에 추가 (없으면)
-    const sheetsWeekStart = no3Schedule.weekStart || westminsterSchedule.weekStart;
-    if (sheetsWeekStart && !availableWeeks.includes(sheetsWeekStart)) {
-      availableWeeks = [sheetsWeekStart, ...availableWeeks];
+  try {
+    const dbSchedule = await getScheduleByWeek(targetWeek);
+
+    if (dbSchedule) {
+      no3Schedule = dbSchedule.no3Schedule;
+      westminsterSchedule = dbSchedule.westminsterSchedule;
+    } else {
+      // DB에 데이터 없음 - 빈 스케줄
+      no3Schedule = {
+        weekStart: targetWeek,
+        weekEnd: getWeekEnd(new Date(targetWeek)),
+        location: "No.3" as const,
+        entries: [],
+      };
+      westminsterSchedule = {
+        weekStart: targetWeek,
+        weekEnd: getWeekEnd(new Date(targetWeek)),
+        location: "Westminster" as const,
+        entries: [],
+      };
     }
   } catch (error) {
-    console.error("Failed to fetch from Google Sheets:", error);
+    console.error("Failed to fetch from DB:", error);
     // 빈 스케줄로 초기화
     no3Schedule = {
-      weekStart: currentWeekStart,
-      weekEnd: "",
+      weekStart: targetWeek,
+      weekEnd: getWeekEnd(new Date(targetWeek)),
       location: "No.3" as const,
       entries: [],
     };
     westminsterSchedule = {
-      weekStart: currentWeekStart,
-      weekEnd: "",
+      weekStart: targetWeek,
+      weekEnd: getWeekEnd(new Date(targetWeek)),
       location: "Westminster" as const,
       entries: [],
     };
@@ -54,11 +68,6 @@ export default async function Home() {
   // availableWeeks가 비어있으면 현재 주 추가
   if (availableWeeks.length === 0) {
     availableWeeks = [currentWeekStart];
-  }
-
-  // 현재 주가 availableWeeks에 없으면 추가 (항상 현재 주로 네비게이션 가능하도록)
-  if (!availableWeeks.includes(currentWeekStart)) {
-    availableWeeks = [currentWeekStart, ...availableWeeks].sort();
   }
 
   return (
