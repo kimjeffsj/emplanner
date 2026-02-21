@@ -101,10 +101,20 @@ export async function weeklySync(): Promise<SyncResult> {
     // 1. 현재 주 데이터 동기화
     const syncResult = await syncCurrentWeekFromSheets();
 
-    if (syncResult.success) {
-      totalEntriesSynced += syncResult.entriesSynced;
-      weeksProcessed += syncResult.weeksProcessed;
+    if (!syncResult.success) {
+      console.error(`Sync failed: ${syncResult.message}`);
+      return {
+        success: false,
+        message: syncResult.message,
+        weeksProcessed: 0,
+        entriesSynced: 0,
+        weeksDeleted: 0,
+        durationMs: Date.now() - startTime,
+      };
     }
+
+    totalEntriesSynced += syncResult.entriesSynced;
+    weeksProcessed += syncResult.weeksProcessed;
 
     // 2. 오래된 주 정리 (3주 이상)
     const deletedCount = await cleanupOldWeeks(3);

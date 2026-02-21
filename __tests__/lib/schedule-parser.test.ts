@@ -185,6 +185,30 @@ describe("parseTimeNote", () => {
       },
     });
   });
+
+  it("should parse ~17:30 correctly (24h format stays as is)", () => {
+    const result = parseTimeNote("Ryan(~17:30)");
+
+    expect(result).toEqual({
+      name: "Ryan",
+      note: {
+        type: "until",
+        time: "17:30",
+      },
+    });
+  });
+
+  it("should parse ~16:00 correctly", () => {
+    const result = parseTimeNote("Ryan(~16:00)");
+
+    expect(result).toEqual({
+      name: "Ryan",
+      note: {
+        type: "until",
+        time: "16:00",
+      },
+    });
+  });
 });
 
 describe("parseEmployees", () => {

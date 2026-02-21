@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
     const result = await weeklySync();
 
     if (result.success) {
+      console.log(`Sync success: ${result.entriesSynced} entries synced, ${result.durationMs}ms`);
       return NextResponse.json({
         success: true,
         message: result.message,
@@ -45,6 +46,7 @@ export async function GET(request: NextRequest) {
         syncedAt: new Date().toISOString(),
       });
     } else {
+      console.error(`Sync failed: ${result.message}`);
       return NextResponse.json(
         {
           success: false,
