@@ -54,8 +54,9 @@ export default function ScheduleViewer({
   const isNavigatingRef = useRef(false);
   const currentWeekRef = useRef(currentWeekStart); // 현재 주차 추적용 ref
 
-  // 주차별 스케줄 캐시 (API 중복 호출 방지)
-  const weekCacheRef = useRef<Map<string, { no3: WeekSchedule; westminster: WeekSchedule; syncedAt: string | null }>>(new Map());
+  // 주차별 스케줄 캐시 (API 중복 호출 방지, TTL: 5분)
+  const weekCacheRef = useRef<Map<string, { no3: WeekSchedule; westminster: WeekSchedule; syncedAt: string | null; cachedAt: number }>>(new Map());
+  const CACHE_TTL_MS = 5 * 60 * 1000; // 5분
 
   // currentWeekStart 변경 시 ref도 업데이트
   useEffect(() => {
@@ -152,9 +153,9 @@ export default function ScheduleViewer({
         return;
       }
 
-      // 2. 캐시에 있으면 재사용 (API 호출 없음)
+      // 2. 캐시에 있고 TTL 이내면 재사용 (API 호출 없음)
       const cached = weekCacheRef.current.get(newWeekStart);
-      if (cached) {
+      if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS) {
         applySchedule(cached.no3, cached.westminster);
         setSyncedAt(cached.syncedAt);
         return;
@@ -173,6 +174,7 @@ export default function ScheduleViewer({
         no3: data.no3Schedule,
         westminster: data.westminsterSchedule,
         syncedAt: data.syncedAt,
+        cachedAt: Date.now(),
       });
 
       applySchedule(data.no3Schedule, data.westminsterSchedule);

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { weeklySync, syncCurrentWeekFromSheets } from "@/lib/db/sync";
 
 /**
@@ -35,6 +36,7 @@ export async function GET(request: NextRequest) {
     const result = await weeklySync();
 
     if (result.success) {
+      revalidatePath("/");
       console.log(`Sync success: ${result.entriesSynced} entries synced, ${result.durationMs}ms`);
       return NextResponse.json({
         success: true,
@@ -87,6 +89,10 @@ export async function POST(request: NextRequest) {
 
     // 현재 주만 동기화 (수동 트리거)
     const result = await syncCurrentWeekFromSheets();
+
+    if (result.success) {
+      revalidatePath("/");
+    }
 
     return NextResponse.json({
       success: result.success,
