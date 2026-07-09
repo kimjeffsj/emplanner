@@ -33,8 +33,13 @@ Commercial scheduling apps (When I Work, 7shifts, Deputy) were rejected because:
 
 **What if Google Sheets became the admin interface, and a simple website became the employee view?**
 
-```
-Google Sheets (Manager edits) → Cron Sync (15min) → PostgreSQL → Next.js (Employee view)
+```mermaid
+flowchart LR
+    Manager["👩‍💼 Manager"] -->|"Edit schedule"| Sheets["📊 Google Sheets"]
+    Sheets -->|"Cron every 15min"| Sync["🔄 /api/cron/weekly-sync"]
+    Sync -->|"upsert"| DB[("🗄️ PostgreSQL\nVercel Postgres")]
+    DB -->|"query"| App["⚡ Next.js App"]
+    App -->|"View shifts"| Employee["👤 Employee"]
 ```
 
 - **For managers**: Continue using a spreadsheet format with zero learning curve
@@ -69,7 +74,7 @@ Built for users aged 10s-60s with varying tech comfort levels:
 
 Started with TDD to ensure reliability:
 
-- **148 tests** covering components, utilities, and API routes
+- **342 tests** covering components, utilities, and API routes
 - Jest + React Testing Library for component behavior validation
 - Integration tests for Google Sheets parsing logic
 
@@ -85,7 +90,7 @@ Started with TDD to ensure reliability:
 | Data Source | Google Sheets API → PostgreSQL           |
 | Database    | Vercel Postgres (via Prisma)             |
 | Sync        | cron-job.org (every 15 minutes)          |
-| Testing     | Jest + React Testing Library (148 tests) |
+| Testing     | Jest + React Testing Library (342 tests) |
 | Deployment  | Vercel (free tier)                       |
 
 **Architecture Pattern**: DB-first with external cron sync from Google Sheets
@@ -105,7 +110,7 @@ Started with TDD to ensure reliability:
 ### Technical Achievements:
 
 - **$0/month** operating cost (Vercel free tier + Google Sheets)
-- **148 tests** ensuring code reliability
+- **342 tests** ensuring code reliability
 - **<1s page load** via static generation
 - **15min sync cycle** from Sheets to DB via cron
 - **PWA installable** as home screen app
@@ -197,6 +202,56 @@ The app expects a specific Google Sheets format:
 
 ---
 
+## 🗄️ Database Schema
+
+```mermaid
+erDiagram
+    Week {
+        Int id PK
+        Date weekStart UK
+        Date weekEnd
+        Boolean isCurrent
+        DateTime syncedAt
+        DateTime createdAt
+    }
+    ScheduleEntry {
+        Int id PK
+        Int weekId FK
+        String employeeName
+        Date date
+        String dayOfWeek
+        String shift
+        String location
+        String noteType
+        String noteTime
+        DateTime createdAt
+    }
+    SyncLog {
+        Int id PK
+        String syncType
+        String status
+        Int recordsSynced
+        Int durationMs
+        DateTime createdAt
+    }
+
+    Week ||--o{ ScheduleEntry : "has"
+```
+
+---
+
+## 🔌 API Routes
+
+| Endpoint | Method | Description |
+| -------- | ------ | ----------- |
+| `/api/schedule/available-weeks` | GET | List weeks available in DB |
+| `/api/schedule/[weekStart]` | GET | Fetch schedule for a specific week (DB → Sheets fallback) |
+| `/api/cron/weekly-sync` | GET | Trigger sync via cron (requires `CRON_SECRET`) |
+| `/api/cron/weekly-sync` | POST | Manual sync trigger |
+| `/api/debug` | GET | Raw Google Sheets data for debugging |
+
+---
+
 ## 🧪 Testing
 
 ```bash
@@ -205,7 +260,7 @@ npm run test:watch        # Watch mode
 npm run test:coverage     # Coverage report
 ```
 
-**148 tests** covering:
+**342 tests** covering:
 
 - Component rendering and interactions
 - Schedule parsing logic
@@ -230,7 +285,7 @@ chicko-schedule/
 │   ├── google-sheets.ts     # Google Sheets API client
 │   ├── schedule-parser.ts   # Parse sheet data
 │   └── db/                  # Prisma client + queries
-├── __tests__/               # Jest tests (131 tests)
+├── __tests__/               # Jest tests (342 tests)
 └── prisma/schema.prisma     # Database schema
 ```
 

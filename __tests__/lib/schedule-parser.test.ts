@@ -113,6 +113,43 @@ describe("parseTimeNote", () => {
     });
   });
 
+  // Flexible spaces around until/from tests
+  it("should parse formal format without space", () => {
+    const result = parseTimeNote("Jane(until17:00)");
+
+    expect(result).toEqual({
+      name: "Jane",
+      note: {
+        type: "until",
+        time: "17:00",
+      },
+    });
+  });
+
+  it("should parse formal format with extra spaces inside parentheses", () => {
+    const result = parseTimeNote("Jane( until 17:00 )");
+
+    expect(result).toEqual({
+      name: "Jane",
+      note: {
+        type: "until",
+        time: "17:00",
+      },
+    });
+  });
+
+  it("should parse short format with spaces", () => {
+    const result = parseTimeNote("Jane( ~ 17:00 )");
+
+    expect(result).toEqual({
+      name: "Jane",
+      note: {
+        type: "until",
+        time: "17:00",
+      },
+    });
+  });
+
   // Short format patterns
   it("should parse until short format (~HH:MM)", () => {
     const result = parseTimeNote("Ryan(~16:00)");

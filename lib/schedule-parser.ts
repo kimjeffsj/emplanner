@@ -77,7 +77,7 @@ export function parseTimeNote(input: string): {
   }
 
   // 패턴 1: 정식 표기 - Name(until|from HH:MM) 또는 Name(until|from H:MM)
-  const formalRegex = /^(.+?)\((until|from)\s+(\d{1,2}):(\d{2})\)$/;
+  const formalRegex = /^(.+?)\(\s*(until|from)\s*(\d{1,2}):(\d{2})\s*\)$/;
   const formalMatch = trimmed.match(formalRegex);
 
   if (formalMatch) {
@@ -96,7 +96,7 @@ export function parseTimeNote(input: string): {
   }
 
   // 패턴 2: until 약식 - Name(~HH:MM) 또는 Name(~H:MM)
-  const untilShortRegex = /^(.+?)\(~(\d{1,2}):(\d{2})\)$/;
+  const untilShortRegex = /^(.+?)\(\s*~\s*(\d{1,2}):(\d{2})\s*\)$/;
   const untilShortMatch = trimmed.match(untilShortRegex);
 
   if (untilShortMatch) {
